@@ -1,3 +1,4 @@
+name: fpga_intermediate
 services:
   mysql:
     image: mysql:latest
@@ -49,7 +50,7 @@ services:
     ports:
       - 8091:8091
     volumes:
-      - Z:/hdu_willow/Container/source/seata-config:/root/seata-config
+      - Z:/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
     depends_on:
       - nacos
 
@@ -61,10 +62,10 @@ services:
       - 6379:6379
     volumes:
       - type: bind
-        source: Z:/hdu_willow/Container/source/redis.conf
+        source: Z:/hdu_willow/fpga_intermediate/source/redis.conf
         target: /usr/local/etc/redis/redis.conf
       - type: bind
-        source: Z:/hdu_willow/Container/source/redis.log
+        source: Z:/hdu_willow/fpga_intermediate/source/redis.log
         target: /var/log/redis.log
       - N:/redis-data:/data
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
@@ -96,5 +97,5 @@ services:
     command: ["sh", "mqbroker", "-c", "/opt/rocketmq-5.3.1/conf/broker.conf"]
     volumes:
       - type: bind
-        source: Z:/hdu_willow/Container/source/broker.conf
+        source: Z:/hdu_willow/fpga_intermediate/source/broker.conf
         target: /opt/rocketmq-5.3.1/conf/broker.conf
