@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+CREATE DATABASE IF NOT EXISTS `nacos_config` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+USE `nacos_config`;
 /******************************************/
 /*   数据库全名 = nacos_config   */
 /*   表名称 = config_info   */
 /******************************************/
-USE `nacos`;
 CREATE TABLE `config_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   `data_id` varchar(255) NOT NULL COMMENT 'data_id',

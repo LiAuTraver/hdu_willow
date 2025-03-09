@@ -12,11 +12,16 @@ services:
       MYSQL_USER: nacos
       MYSQL_PASSWORD: MySQL142536
     ports:
-      - 3306:3306
+      - 3306:33
     volumes:
       - /workspace/fpga/backend/db/mysql/init:/docker-entrypoint-initdb.d
-      - /workspace/fpga/backend/db/mysql/data:/data
-    command: ["mysqld", "--datadir=/data"]
+      - /workspace/fpga/backend/db/mysql/data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pMySQL142536"]
+      interval: 30s
+      timeout: 90s
+      retries: 5
+      start_period: 30s
 
   nacos:
     image: nacos/nacos-server:2.0.2
