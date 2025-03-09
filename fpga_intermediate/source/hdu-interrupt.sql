@@ -13,6 +13,7 @@
 
  Date: 03/09/2021 21:55:51
 */
+
 USE `hdu-interrupt`;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
