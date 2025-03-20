@@ -12,7 +12,7 @@ services:
       MYSQL_USER: nacos
       MYSQL_PASSWORD: MySQL142536
     ports:
-      - 3306:33
+      - 3306:3306
     volumes:
       - /workspace/fpga/backend/db/mysql/init:/docker-entrypoint-initdb.d
       - /workspace/fpga/backend/db/mysql/data:/var/lib/mysql
