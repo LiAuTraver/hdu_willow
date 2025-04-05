@@ -19,7 +19,6 @@
 		<module>hdu-gateway</module>
 		<module>hdu-fpga</module>
 		<module>hdu-auth</module>
-		<module>hdu-neoauth</module>
 		<module>hdu-data-transform</module>
 	</modules>
 	<properties>

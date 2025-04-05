@@ -14,7 +14,7 @@
  Date: 13/04/2024 16:59:21
 */
 
-CREATE DATABASE `hdu-interrupt` IF NOT EXISTS DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS `hdu-interrupt` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `hdu-interrupt`;
 
 SET NAMES utf8mb4;
