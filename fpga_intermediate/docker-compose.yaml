@@ -1,19 +1,21 @@
 name: fpga_intermediate
+version: "3.9"
 services:
   mysql:
     image: mysql:latest
     container_name: mysql
     hostname: mysql
+    user: "0"
     environment:
       MYSQL_ROOT_PASSWORD: MySQL142536
       MYSQL_DATABASE: nacos
       MYSQL_USER: nacos
       MYSQL_PASSWORD: MySQL142536
     ports:
-      - "3306:3306"
+      - 3306:3306
     volumes:
-      - N:/db/mysql/data:/var/lib/mysql
-      - N:/db/mysql/init:/docker-entrypoint-initdb.d
+      - /workspace/fpga/backend/db/mysql/init:/docker-entrypoint-initdb.d
+      - /workspace/fpga/backend/db/mysql/data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pMySQL142536"]
       interval: 30s
@@ -26,21 +28,20 @@ services:
     container_name: nacos
     environment:
       MODE: standalone
-      SPRING_DATASOURCE_PLATFORM: mysql
-      MYSQL_SERVICE_HOST: mysql
+      SPRING_DATASOURCE_PLATFORM: localhost
+      MYSQL_SERVICE_HOST: localhost
       MYSQL_SERVICE_PORT: 3306
       MYSQL_SERVICE_USER: root
       MYSQL_SERVICE_PASSWORD: MySQL142536
       MYSQL_SERVICE_DB_NAME: nacos
       MYSQL_SERVICE_DB_PARAM: useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
     ports:
-      - "8848:8848"
-      - "9848:9848"
-      - "9849:9849"
-      - "7848:7848"
+      - 8848:8848
+      - 9848:9848
+      - 9849:9849
+      - 7848:7848
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
 
   seata:
     image: seataio/seata-server:2.0.0
@@ -48,9 +49,9 @@ services:
     environment:
       SEATA_CONFIG_NAME: file:/root/seata-config/registry
     ports:
-      - "8091:8091"
+      - 8091:8091
     volumes:
-      - Z:/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
+      - /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
     depends_on:
       - nacos
 
@@ -59,37 +60,49 @@ services:
     container_name: redis
     user: "0"  # run as root user
     ports:
-      - "6379:6379"
+      - 6379:6379
     volumes:
       - type: bind
-        source: Z:/hdu_willow/fpga_intermediate/source/redis.conf
+        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/redis.conf
         target: /usr/local/etc/redis/redis.conf
       - type: bind
-        source: Z:/hdu_willow/fpga_intermediate/source/redis.log
+        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/redis.log
         target: /var/log/redis.log
-      - N:/redis-data:/data
+      - /workspace/fpga/backend/redis-data:/data
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     environment:
-      SPRING_DATASOURCE_PLATFORM: mysql
+      SPRING_DATASOURCE_PLATFORM: localhost
 
   zookeeper:
     image: zookeeper:3.9.3
     container_name: zookeeper
     ports:
-      - "2181:2181"
+      - 2181:2181
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+
   namesrv:
     image: apache/rocketmq:5.3.1
     container_name: rmqnamesrv
     ports:
-      - "9876:9876"
+      - 9876:9876
     command: ["sh", "mqnamesrv"]
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+
   broker:
     image: apache/rocketmq:5.3.1
     container_name: rmqbroker
     ports:
-      - "10909:10909"
-      - "10911:10911"
-      - "10912:10912"
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
     environment:
       - NAMESRV_ADDR=localhost:9876
     depends_on:
@@ -97,5 +110,10 @@ services:
     command: ["sh", "mqbroker", "-c", "/opt/rocketmq-5.3.1/conf/broker.conf"]
     volumes:
       - type: bind
-        source: Z:/hdu_willow/fpga_intermediate/source/broker.conf
+        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/broker.conf
         target: /opt/rocketmq-5.3.1/conf/broker.conf
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-CREATE DATABASE IF NOT EXISTS `nacos_config` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
-USE `nacos_config`;
+CREATE DATABASE IF NOT EXISTS `nacos` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+USE `nacos`;
 /******************************************/
 /*   数据库全名 = nacos_config   */
 /*   表名称 = config_info   */
