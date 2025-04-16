@@ -14,8 +14,8 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /workspace/fpga/backend/db/mysql/init:/docker-entrypoint-initdb.d
-      - /workspace/fpga/backend/db/mysql/data:/var/lib/mysql
+      - ~/Desktop/workbench/db/mysql/init:/docker-entrypoint-initdb.d
+      - ~/Desktop/workbench/db/mysql/data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pMySQL142536"]
       interval: 30s
@@ -51,7 +51,7 @@ services:
     ports:
       - 8091:8091
     volumes:
-      - /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
+      - ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
     depends_on:
       - nacos
 
@@ -63,10 +63,10 @@ services:
       - 6379:6379
     volumes:
       - type: bind
-        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/redis.conf
+        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/redis.conf
         target: /usr/local/etc/redis/redis.conf
       - type: bind
-        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/redis.log
+        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/redis.log
         target: /var/log/redis.log
       - /workspace/fpga/backend/redis-data:/data
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
@@ -110,7 +110,7 @@ services:
     command: ["sh", "mqbroker", "-c", "/opt/rocketmq-5.3.1/conf/broker.conf"]
     volumes:
       - type: bind
-        source: /workspace/fpga/backend/hdu_willow/fpga_intermediate/source/broker.conf
+        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/broker.conf
         target: /opt/rocketmq-5.3.1/conf/broker.conf
     ulimits:
       nproc: 65535
