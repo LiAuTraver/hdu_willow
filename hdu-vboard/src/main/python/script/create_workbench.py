@@ -8,11 +8,6 @@ def generate_main_cpp(bind_file, module_name, output_file):
     with open(bind_file, "r") as f:
         bind_data = json.load(f)
 
-    # 解析 inputRows 和 outputRows
-    # all_signals = bind_data.get("inputRows", []) + bind_data.get("outputRows", [])
-    # input_signals=bind_data.get("inputRows", [])
-    # output_signals=bind_data.get("outputRows",[])
-
     pin_bindings = []
     update_from_json_calls = []
     update_to_json_calls = []
@@ -22,16 +17,13 @@ def generate_main_cpp(bind_file, module_name, output_file):
         input_signal = input_entry["signal"]
         input_pins = input_entry["pins"]
 
-        if(input_signal!=""):
+        if input_signal != "":
             pin_bindings.append(
                 # pin[1]=>pin即可改回原来版本
-                f"""    pins_map[&top->{input_signal}] = {{\n        {', '.join(f'"{pin[1]}"' for pin in input_pins)}\n    }};"""
+                f"""pins_map[&top->{input_signal}] = {{\n        {', '.join(f'{pin[1]}' for pin in input_pins)}\n    }};"""
             )
             update_from_json_calls.append(
-                f"    update_signal_from_json(input_json, &top->{input_signal});"
-            )
-            update_to_json_calls.append(
-                f"    output_signal_to_json(output_json, &top->{input_signal});"
+                f"update_input_signal_from_json(input_json, &top->{input_signal});"
             )
 
     # 对于输出信号 绑定 更新
@@ -39,12 +31,12 @@ def generate_main_cpp(bind_file, module_name, output_file):
         output_signal = output_entry["signal"]
         output_pins = output_entry["pins"]
 
-        if(output_signal!=""):
+        if output_signal != "":
             pin_bindings.append(
-                f"""    pins_map[&top->{output_signal}] = {{\n        {', '.join(f'"{pin[1]}"' for pin in output_pins)}\n    }};"""
+                f"""pins_map[&top->{output_signal}] = {{\n        {', '.join(f'{pin[1]}' for pin in output_pins)}\n    }};"""
             )
             update_to_json_calls.append(
-                f"    output_signal_to_json(output_json, &top->{output_signal});"
+                f"update_output_signal(&top->{output_signal});"
             )
 
     # 检验clk信号是否存在
@@ -52,13 +44,10 @@ def generate_main_cpp(bind_file, module_name, output_file):
         input_signal = bind_data["CLK"]
         pin_bindings.append(
             # pin[1]=>pin即可改回原来版本
-            f"""    pins_map[&top->{input_signal}] = {{"CLK"}};"""
+            f"""pins_map[&top->{input_signal}] = {{CLK}};"""
         )
         update_from_json_calls.append(
-            f"    update_signal_from_json(input_json, &top->{input_signal});"
-        )
-        update_to_json_calls.append(
-            f"    output_signal_to_json(output_json, &top->{input_signal});"
+            f"update_input_signal_from_json(input_json, &top->{input_signal});"
         )
 
     # 生成 main.cpp 的内容
@@ -78,44 +67,50 @@ V{module_name} *top = new V{module_name};
 
 // 创建一个用于绑定信号和引脚的映射
 void bind_all_pins() {{
-{chr(10).join(pin_bindings)}
+    {(chr(10)+chr(9)).join(pin_bindings)}
 }}
 
 // 更新所有信号
-void update_all_signals_from_json(const nlohmann::json &input_json) {{
-{chr(10).join(update_from_json_calls)}
+void update_input_signals_from_json(const nlohmann::json &input_json) {{
+    {(chr(10)+chr(9)).join(update_from_json_calls)}
 }}
 
-void update_all_signals_to_json(nlohmann::json &output_json) {{
-{chr(10).join(update_to_json_calls)}
+int update_output_signals() {{
+    return {(chr(10)+'|').join(update_to_json_calls)}
 }}
 
 int main(int argc, char **argv) {{
     Verilated::commandArgs(argc, argv);
     vluint64_t main_time = 0;
 
-    std::thread input_thread(listen_for_input);
-
     bind_all_pins();
+    top->eval();
+    if (update_output_signals()) {{
+        print_signals_as_json();
+    }}
 
-    while (running && !Verilated::gotFinish()) {{
+    while (!Verilated::gotFinish()) {{
         {{        
-            nlohmann::json output_json;
-            std::lock_guard<std::mutex> lock(value_mutex);
-
+            nlohmann::json input_json;
+            try {{
+                if (std::cin >> input_json) {{
+                    update_input_signals_from_json(input_json);
+                }}
+            }}
+            catch (const std::exception &e) {{
+                if (std::cin.eof()) {{ // 检测 EOF
+                    break;
+                }} else {{
+                    std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+                }}
+            }}
             top->eval();
 
-            update_all_signals_to_json(output_json);
-            if (output_json != old_output_json) {{
-                old_output_json = output_json;
-                output_json["Timer"] = main_time++;
-                cout << output_json << endl;
+            if (update_output_signals()) {{
+                print_signals_as_json();
             }}
         }}
     }}
-
-    running = false;
-    input_thread.join();
 
     delete top;
     std::cout << "Simulation ended gracefully." << std::endl;
