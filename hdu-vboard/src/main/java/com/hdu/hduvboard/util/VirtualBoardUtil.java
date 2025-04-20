@@ -13,7 +13,9 @@ public class VirtualBoardUtil {
         if (simInput == null) {
             throw new Exception("simInput is null");
         }
-        simInput.write(signal_json);
+        simInput.write(signal_json+"\n");
+        simInput.flush();
+        log.debug("send signal to virtual board:"+signal_json);
     }
 
     public static JSONObject getSignalFromVirtualBoard(BufferedReader simOutput) throws Exception {

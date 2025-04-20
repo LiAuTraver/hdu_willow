@@ -131,6 +131,19 @@ void print_signals_as_json() {
         printf(R"(,"%s":%d)", pins_name[i], pins_value[i]);  // 注意前缀','
     }
     printf("}\n");
+    // fflush(stdout);
+}
+
+// 对update_out_put_map()和print_pins_map()的包装
+// 如果有改变 输出对应信号值
+// 没有改变 输出空行
+// 自动flush
+void update_and_print() {
+    if (update_output_signals()) {
+        print_signals_as_json();
+    } else {
+        printf("\n");
+    }
     fflush(stdout);
 }
 

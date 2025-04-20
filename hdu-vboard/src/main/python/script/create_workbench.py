@@ -85,8 +85,7 @@ int main(int argc, char **argv) {{
 
     bind_all_pins();
     top->eval();
-    update_output_signals();
-    print_signals_as_json();
+    update_and_print();
 
     while (!Verilated::gotFinish()) {{
         {{        
@@ -105,9 +104,8 @@ int main(int argc, char **argv) {{
             }}
             top->eval();
 
-            if (update_output_signals()) {{
-                print_signals_as_json();
-            }}
+            update_and_print();
+            fflush(stdout);
         }}
     }}
 

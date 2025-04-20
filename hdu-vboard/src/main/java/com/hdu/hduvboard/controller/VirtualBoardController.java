@@ -73,7 +73,7 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
             log.debug("Now it's running!");
             JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(workspaceName);
             log.debug(finalJson.toString());
-            return Result.ok(finalJson.toString());
+            return Result.ok(finalJson);
         } catch (Exception e) {
             try {
                 virtualBoardService.clearWorkbench(workspaceName);
@@ -90,6 +90,8 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     public Result signal(HttpServletRequest request, @RequestBody JSONObject signalJson) {
         String token = request.getHeader("token");
         try {
+            log.debug("Received input signal:"+signalJson.toString());
+            log.debug("data:"+signalJson.get("data").toString());
             virtualBoardService.sendSignal(token, signalJson.get("data").toString());
             return Result.ok(virtualBoardService.getSignalFromVirtualBoard(token));
         } catch (Exception e) {

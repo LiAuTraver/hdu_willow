@@ -128,7 +128,10 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         simulationWorkerBO.simInput.write((char) -1);
         if (simulationWorkerBO.simulationProcess.isAlive()) {
             simulationWorkerBO.simulationProcess.destroy();
+            log.debug("workbench:" + workspaceName + " stopped!");
         }
+        VbSysFileUtil.deleteDirectory(new File(VbSysFileUtil.getFullWorkbenchPath(workspaceName)));
+        log.debug("workbench:" + workspaceName + " cleared!");
         return true;
     }
 
