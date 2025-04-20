@@ -15,9 +15,9 @@
 
 #define INPUT_HEX   INPUT0, INPUT1, INPUT2, INPUT3
 
-#define OUTPUT_LED  LD00, LD01, LD02, LD03, LD04, LD05, LD06, LD07, \
-                    LD08, LD09, LD10, LD11, LD12, LD13, LD14, LD15, \
-                    LD16, LD17, LD18, LD19
+#define OUTPUT_LED  L00, L01, L02, L03, L04, L05, L06, L07, \
+                    L08, L09, L10, L11, L12, L13, L14, L15, \
+                    L16, L17, L18, L19
 
 #define OUTPUT_SEG  OUTPUT00, OUTPUT01, OUTPUT02, OUTPUT03
 
@@ -29,13 +29,13 @@
 
 #define INPUT_HEX_STR   "INPUT0", "INPUT1", "INPUT2", "INPUT3"
 
-#define OUTPUT_LED_STR  "LD00", "LD01", "LD02", "LD03", "LD04", "LD05", "LD06", "LD07", \
-                        "LD08", "LD09", "LD10", "LD11", "LD12", "LD13", "LD14", "LD15", \
-                        "LD16", "LD17", "LD18", "LD19"
+#define OUTPUT_LED_STR  "L00", "L01", "L02", "L03", "L04", "L05", "L06", "L07", \
+                        "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", \
+                        "L16", "L17", "L18", "L19"
 
 #define OUTPUT_SEG_STR  "OUTPUT00", "OUTPUT01", "OUTPUT02", "OUTPUT03"
 
-const static char *pins_name[] = {
+inline const static char *pins_name[] = {
     "CLK",INPUT_SW_STR,INPUT_SWB_STR,INPUT_HEX_STR,OUTPUT_LED_STR,OUTPUT_SEG_STR
 };
 
@@ -126,11 +126,12 @@ int update_output_signals();
 void print_signals_as_json() {
     // 因为json不允许多余','
     // 第一行单独处理
-    printf("{\"LD00\":%d", pins_value[LD00]);
-    for (int i = LD01;i < PINS_LEN;++i) {
-        printf(",\"%s\":%d", pins_name[i], pins_value[i]);  // 注意前缀','
+    printf(R"({"L00":%d)", pins_value[L00]);
+    for (int i = L01;i < PINS_LEN;++i) {
+        printf(R"(,"%s":%d)", pins_name[i], pins_value[i]);  // 注意前缀','
     }
     printf("}\n");
+    fflush(stdout);
 }
 
 #endif

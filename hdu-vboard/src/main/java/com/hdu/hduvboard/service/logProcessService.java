@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.service;
+package com.hdu.hduvboard.service;
 
 public interface logProcessService {
     void logProcess(Process process);

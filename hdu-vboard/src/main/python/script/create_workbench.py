@@ -58,7 +58,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
 #include <atomic>
 #include <nlohmann/json.hpp>
 #include <chrono>
-#include "../../header/fpga.hh"
+#include "../../../../src/main/cpp/header/virtual_board.hh"
 #define COUNT_TIME 5'000
 
 using namespace std;
@@ -85,9 +85,8 @@ int main(int argc, char **argv) {{
 
     bind_all_pins();
     top->eval();
-    if (update_output_signals()) {{
-        print_signals_as_json();
-    }}
+    update_output_signals();
+    print_signals_as_json();
 
     while (!Verilated::gotFinish()) {{
         {{        

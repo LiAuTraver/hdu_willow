@@ -1,9 +1,10 @@
-package com.hdu.hdufpga.service.impl;
+package com.hdu.hduvboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
 import com.hdu.hdufpga.exception.InvalidFileSuffixException;
-import com.hdu.hdufpga.service.VbSysFileService;
-import com.hdu.hdufpga.util.VbSysFileUtil;
+import com.hdu.hduvboard.service.VbSysFileService;
+import com.hdu.hduvboard.util.VbSysFileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class VbSysFileServiceImpl implements VbSysFileService {
     public String saveVerilogFile(HttpServletRequest request, MultipartFile verilogFile) throws IOException {
         String originalFileName = verilogFile.getOriginalFilename();
@@ -21,9 +23,10 @@ public class VbSysFileServiceImpl implements VbSysFileService {
         // 进行文件名校验，确认上传的是后缀为v的文件
         if (originalFileName.matches(verilogPattern)) {
             String token = request.getHeader("token");
-            String filePath = VbSysFileUtil.getSavePath(token) + "/" + originalFileName;
+            String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
             FileUtil.del(filePath);
             VbSysFileUtil.saveFile(verilogFile, filePath);
+            log.debug("Verilog file saved to {} successfully!", filePath);
             return filePath;
         } else {
             throw new InvalidFileSuffixException("文件后缀不为.v");
@@ -39,9 +42,10 @@ public class VbSysFileServiceImpl implements VbSysFileService {
         // 进行文件名校验，确认上传的是后缀为v的文件
         if (originalFileName.matches(verilogPattern)) {
             String token = request.getHeader("token");
-            String filePath = VbSysFileUtil.getSavePath(token) + "/" + originalFileName;
+            String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
             FileUtil.del(filePath);
             VbSysFileUtil.saveFile(bindFile, filePath);
+            log.debug("Bind json saved to {} successfully!", filePath);
             return filePath;
         } else {
             throw new InvalidFileSuffixException("文件后缀不为.json");
