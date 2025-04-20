@@ -1,15 +1,17 @@
 server:
-  port: 8082
+  port: 8080
 spring:
+  profiles:
+    active: dev
+  redis:
+    host: localhost
   cloud:
     nacos:
       discovery:
         server-addr: localhost:8848
         namespace: cea83c1b-7a99-4bb1-8596-895a4faab520
-  redis:
-    host: localhost
   application:
-    name: hdu-record
+    name: hdu-account
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
@@ -41,7 +43,3 @@ dubbo:
       namespace: c29600b0-2e5d-450b-bab0-e56d78292d51
   metadata-report:
     address: nacos://localhost:8848
-rocketmq:
-  name-server: localhost:9876
-  producer:
-    group: hdu-record-group
