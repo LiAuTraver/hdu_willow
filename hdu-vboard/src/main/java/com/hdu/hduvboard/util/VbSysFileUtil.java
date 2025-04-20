@@ -1,7 +1,8 @@
-package com.hdu.hdufpga.util;
+package com.hdu.hduvboard.util;
 
 import cn.hutool.core.io.FileUtil;
 import org.apache.commons.io.FileExistsException;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class VbSysFileUtil {
-
     public static void saveFile(MultipartFile multipartFile, String fullPath) throws IOException {
         if (multipartFile.isEmpty()) return;
         File file = new File(fullPath);
@@ -19,6 +19,14 @@ public class VbSysFileUtil {
             }
         }
         multipartFile.transferTo(file);
+    }
+
+    public static String getRootBasePath() {
+        String absolutePath = FileUtil.getAbsolutePath(".");
+        if (absolutePath.contains("target/")) {
+            return FileUtil.getAbsolutePath("../../");
+        }
+        return absolutePath;
     }
 
     public static String getVbBasePath() {

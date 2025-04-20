@@ -1,16 +1,13 @@
-package com.hdu.hdufpga.controller;
+package com.hdu.hduvboard.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.hdu.hdufpga.annotation.CheckAndRefreshToken;
 import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
-import com.hdu.hdufpga.entity.po.CircuitBoardPO;
-import com.hdu.hdufpga.service.VbSysFileService;
-import com.hdu.hdufpga.service.VirtualBoardService;
-import com.hdu.hdufpga.util.VbSysFileUtil;
+import com.hdu.hduvboard.service.VbSysFileService;
+import com.hdu.hduvboard.service.VirtualBoardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import cn.hutool.json.JSONObject;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -64,13 +61,19 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
         String token = request.getHeader("token");
         String workspaceName = token;
         try {
+            log.debug("Hello to simulate");
             String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
             String bindFullPath = vbSysFileService.saveBindFile(request, bindFile);
-
+            log.debug("Now to create virtual board");
             virtualBoardService.createWorkbench(workspaceName, verilogFullPath, bindFullPath);
+            log.debug("Ok to create workbench, now to check it");
             virtualBoardService.checkWorkbench(workspaceName);
+            log.debug("Ok to check workbench, now to run it");
             virtualBoardService.runWorkbench(workspaceName);
-            return Result.ok();
+            log.debug("Now it's running!");
+            JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(workspaceName);
+            log.debug(finalJson.toString());
+            return Result.ok(finalJson);
         } catch (Exception e) {
             try {
                 virtualBoardService.clearWorkbench(workspaceName);
@@ -87,6 +90,8 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     public Result signal(HttpServletRequest request, @RequestBody JSONObject signalJson) {
         String token = request.getHeader("token");
         try {
+            log.debug("Received input signal:"+signalJson.toString());
+            log.debug("data:"+signalJson.get("data").toString());
             virtualBoardService.sendSignal(token, signalJson.get("data").toString());
             return Result.ok(virtualBoardService.getSignalFromVirtualBoard(token));
         } catch (Exception e) {

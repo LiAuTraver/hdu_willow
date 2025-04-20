@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.exception;
+package com.hdu.hduvboard.exception;
 
 public class SimulationException extends RuntimeException {
     public SimulationException(String message) {

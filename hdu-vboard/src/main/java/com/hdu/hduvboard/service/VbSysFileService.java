@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.service;
+package com.hdu.hduvboard.service;
 
 import org.springframework.web.multipart.MultipartFile;
 

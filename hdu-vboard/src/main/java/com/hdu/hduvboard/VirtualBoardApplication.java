@@ -1,4 +1,4 @@
-package com.hdu.hdufpga;
+package com.hdu.hduvboard;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,14 +1,14 @@
-package com.hdu.hdufpga.service.impl;
+package com.hdu.hduvboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.hdu.hdufpga.entity.bo.SimulationWorkerBO;
-import com.hdu.hdufpga.exception.CreateWorkbenchException;
-import com.hdu.hdufpga.exception.MakeWorkbenchException;
-import com.hdu.hdufpga.service.VirtualBoardService;
-import com.hdu.hdufpga.service.logProcessService;
-import com.hdu.hdufpga.util.VbSysFileUtil;
-import com.hdu.hdufpga.util.VirtualBoardUtil;
+import cn.hutool.json.JSONObject;
+import com.hdu.hduvboard.entity.bo.SimulationWorkerBO;
+import com.hdu.hduvboard.exception.CreateWorkbenchException;
+import com.hdu.hduvboard.exception.MakeWorkbenchException;
+import com.hdu.hduvboard.service.VirtualBoardService;
+import com.hdu.hduvboard.service.logProcessService;
+import com.hdu.hduvboard.util.VbSysFileUtil;
+import com.hdu.hduvboard.util.VirtualBoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         }
 
         // 脚本路径
-        String scriptFullPath = FileUtil.getAbsolutePath("./hdu-virtual-board/src/main/python/script/workbench.py");
+        String scriptFullPath = VbSysFileUtil.getRootBasePath() + "src/main/python/script/create_workbench.py";
 
         ProcessBuilder builder = new ProcessBuilder(
                 "python3", scriptFullPath,
@@ -65,6 +65,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         runBuilder.redirectErrorStream(true);
 
         Process process = runBuilder.start();
+        logProcessService.logProcess(process);
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
         int exitCode = process.waitFor();
@@ -78,11 +79,12 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     @Override
     public SimulationWorkerBO runWorkbench(String workspaceName) throws Exception {
         ProcessBuilder runBuilder = new ProcessBuilder("make", "run");
-        if (!FileUtil.exist(VbSysFileUtil.getFullWorkbenchPath(workspaceName))) {
+        String workbenchPath = VbSysFileUtil.getFullWorkbenchPath(workspaceName);
+        if (!FileUtil.exist(workbenchPath)) {
             throw new CreateWorkbenchException("workbench does not exist");
         }
 
-        runBuilder.directory(new File(VbSysFileUtil.getFullWorkbenchPath(workspaceName)));
+        runBuilder.directory(new File(workbenchPath));
         runBuilder.redirectErrorStream(true);
 
         Process simProcess = runBuilder.start();
@@ -93,7 +95,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         SimulationWorkerBO simulationWorkerBO =
                 new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput, true);
         log.info("Simulation process started for workspace: {}", workspaceName);
-
+        simulationWorkers.put(workspaceName, simulationWorkerBO);
         return simulationWorkerBO;
     }
 
@@ -126,7 +128,10 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         simulationWorkerBO.simInput.write((char) -1);
         if (simulationWorkerBO.simulationProcess.isAlive()) {
             simulationWorkerBO.simulationProcess.destroy();
+            log.debug("workbench:" + workspaceName + " stopped!");
         }
+        VbSysFileUtil.deleteDirectory(new File(VbSysFileUtil.getFullWorkbenchPath(workspaceName)));
+        log.debug("workbench:" + workspaceName + " cleared!");
         return true;
     }
 

@@ -1,7 +1,7 @@
-package com.hdu.hdufpga.service;
+package com.hdu.hduvboard.service;
 
-import com.alibaba.fastjson.JSONObject;
-import com.hdu.hdufpga.entity.bo.SimulationWorkerBO;
+import cn.hutool.json.JSONObject;
+import com.hdu.hduvboard.entity.bo.SimulationWorkerBO;
 
 public interface VirtualBoardService {
     Boolean createWorkbench(String workspaceName, String verilogPath, String bindPath) throws Exception;

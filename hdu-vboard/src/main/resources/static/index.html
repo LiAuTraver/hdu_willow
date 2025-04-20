@@ -117,102 +117,58 @@
     const statusDiv = document.getElementById('status');
     const outputDiv = document.getElementById('output');
 
-    let sessionId = null;
     let isSimulationRunning = false;
-    let pollInterval;
+    const token = localStorage.getItem("token") || "mock-token"; // 从本地获取 token（你也可以改为手动填写）
 
-    // WebSocket Initialization
-    const ws = new WebSocket('ws://localhost:9999/ws/simulation');
-
-    ws.onopen = () => {
-        statusDiv.textContent = "WebSocket connection established.";
+    const setStatus = (msg, isError = false) => {
+        statusDiv.textContent = msg;
+        statusDiv.className = isError ? 'error' : '';
     };
 
-    ws.onclose = () => {
-        statusDiv.textContent = "WebSocket connection closed.";
-    };
-
-    ws.onmessage = (event) => {
-        try {
-            const json = JSON.parse(event.data);
-            if (json.sessionId) {
-                sessionId = json.sessionId; // Save sessionId from WebSocket message
-                console.log("Session ID received:", sessionId);
-            }
-            const formattedJson = JSON.stringify(json, null, 2); // Format JSON
-            outputDiv.textContent = formattedJson; // Replace content instead of appending
-        } catch (error) {
-            console.error("Failed to parse WebSocket message:", event.data);
-            outputDiv.textContent = `Invalid message: ${event.data}`;
-        }
-    };
-
-    ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        statusDiv.textContent = "WebSocket error. Check the console for details.";
-    };
-
-    // Handle File Upload and Start Simulation
+    // 文件上传并开始仿真
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
-        if (!sessionId) {
-            statusDiv.textContent = "Session ID not available. Please wait for WebSocket connection.";
-            return;
-        }
 
         const verilogFile = document.getElementById('verilogFile').files[0];
         const bindFile = document.getElementById('bindFile').files[0];
 
+        if (!verilogFile || !bindFile) {
+            setStatus("请选择 Verilog 文件和绑定文件。", true);
+            return;
+        }
+
         const formData = new FormData();
         formData.append('verilogFile', verilogFile);
         formData.append('bindFile', bindFile);
-        formData.append('sessionId', sessionId); // Add sessionId to the form data
-
-        statusDiv.textContent = "Uploading files and starting simulation...";
 
         try {
-            const response = await fetch('/fpga/simulate', {
+            setStatus("上传文件并启动仿真中...");
+            const response = await fetch('/vb/simulate', {
                 method: 'POST',
-                body: formData,
+                headers: {
+                    'token': token
+                },
+                body: formData
             });
 
-            if (!response.ok) {
-                throw new Error(`Simulation start failed: ${response.statusText}`);
+            const result = await response.json();
+            console.log(result)
+            if (result.code !== 0) {
+                throw new Error(result.msg || '仿真启动失败');
             }
 
-            const result = await response.text();
-            statusDiv.textContent = "Simulation started successfully. Waiting for output...";
-            console.log("Simulation started:", result);
-
+            setStatus("仿真已启动。");
+            outputDiv.textContent = JSON.stringify(result.result, null, 2);
             isSimulationRunning = true;
             stopButton.style.display = "inline-block";
             sendSignalButton.style.display = "inline-block";
+
         } catch (error) {
-            statusDiv.textContent = "Error starting simulation: " + error.message;
-            statusDiv.className = "error";
+            setStatus("仿真启动出错：" + error.message, true);
         }
     });
 
-    // Handle Stop Simulation
-    stopButton.addEventListener('click', async () => {
-        try {
-            const response = await fetch(`/fpga/stop?sessionId=${sessionId}`, {method: 'POST'});
-            if (!response.ok) {
-                throw new Error("Failed to stop simulation");
-            }
-
-            isSimulationRunning = false;
-            clearInterval(pollInterval);
-            statusDiv.textContent = "Simulation stopped.";
-            stopButton.style.display = "none";
-            sendSignalButton.style.display = "none";
-        } catch (error) {
-            statusDiv.textContent = "Error stopping simulation: " + error.message;
-        }
-    });
-
-    // handle signal
+    // 发送信号
     sendSignalButton.addEventListener('click', async () => {
         let signalData;
 
@@ -223,55 +179,64 @@
             signalData = signalInput.value;
         }
 
-        if (!sessionId) {
-            statusDiv.textContent = "Session ID is required to send signal.";
+        if (!signalData.trim()) {
+            setStatus("请输入或选择信号文件。", true);
             return;
         }
 
-        try {
-            const response = await fetch(`/fpga/signal?sessionId=${sessionId}`, {  // Pass sessionId as query parameter
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: signalData,  // Send signal data as body content
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to send signal data: ${response.statusText}`);
-            }
-
-            const result = await response.text();
-            statusDiv.textContent = "Signal data sent successfully.";
-            console.log("Signal sent:", result);
-        } catch (error) {
-            statusDiv.textContent = "Error sending signal: " + error.message;
-        }
-    });
-
-    sendSignalButton.addEventListener("click", async () => {
-        if (!sessionId) {
-            statusDiv.textContent = "Session ID is required to send signal.";
-            return;
-        }
-
-        let signalData;
-        if (signalFileInput.files.length > 0) {
-            const file = signalFileInput.files[0];
-            signalData = await file.text();
-        } else {
-            signalData = signalInput.value;
-        }
-
-        const message = {
-            type: "signal",
-            sessionId: sessionId,
+        const payload = {
             data: signalData
         };
 
-        ws.send(JSON.stringify(message));  // 通过 WebSocket 发送信号数据
-        console.log("Signal sent:", message);
+        try {
+            const response = await fetch('/vb/signal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': token
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.code !== 0) {
+                throw new Error(result.msg || '发送信号失败');
+            }
+
+            setStatus("信号发送成功。");
+            console.log(result);
+            outputDiv.textContent = JSON.stringify(result.result, null, 2);
+        } catch (error) {
+            setStatus("发送信号出错：" + error.message, true);
+        }
     });
 
+    // 停止仿真
+    stopButton.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/vb/finish', {
+                method: 'POST',
+                headers: {
+                    'token': token
+                }
+            });
 
+            const result = await response.json();
+            console.log(result);
+            if (result.code !== 0) {
+                throw new Error(result.msg || '停止仿真失败');
+            }
+
+            isSimulationRunning = false;
+            setStatus("仿真已停止。");
+            outputDiv.textContent = JSON.stringify(result.result, null, 2);
+            stopButton.style.display = "none";
+            sendSignalButton.style.display = "none";
+        } catch (error) {
+            setStatus("停止仿真出错：" + error.message, true);
+        }
+    });
 </script>
+
 </body>
 </html>
