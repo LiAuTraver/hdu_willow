@@ -1,6 +1,6 @@
-package com.hdu.hduvboard.entity.bo;
+package com.hdu.vboard.entity.bo;
 
-import com.hdu.hduvboard.exception.SimulationException;
+import com.hdu.vboard.exception.SimulationException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

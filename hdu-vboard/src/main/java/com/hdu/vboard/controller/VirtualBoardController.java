@@ -1,9 +1,9 @@
-package com.hdu.hduvboard.controller;
+package com.hdu.vboard.controller;
 
 import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
-import com.hdu.hduvboard.service.VbSysFileService;
-import com.hdu.hduvboard.service.VirtualBoardService;
+import com.hdu.vboard.service.VbSysFileService;
+import com.hdu.vboard.service.VirtualBoardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

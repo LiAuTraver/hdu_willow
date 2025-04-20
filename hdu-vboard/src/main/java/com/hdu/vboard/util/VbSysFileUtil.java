@@ -1,8 +1,7 @@
-package com.hdu.hduvboard.util;
+package com.hdu.vboard.util;
 
 import cn.hutool.core.io.FileUtil;
 import org.apache.commons.io.FileExistsException;
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;

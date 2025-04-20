@@ -1,4 +1,4 @@
-package com.hdu.hduvboard.service;
+package com.hdu.vboard.service;
 
 import org.springframework.web.multipart.MultipartFile;
 

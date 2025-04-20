@@ -1,14 +1,14 @@
-package com.hdu.hduvboard.service.impl;
+package com.hdu.vboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
-import com.hdu.hduvboard.entity.bo.SimulationWorkerBO;
-import com.hdu.hduvboard.exception.CreateWorkbenchException;
-import com.hdu.hduvboard.exception.MakeWorkbenchException;
-import com.hdu.hduvboard.service.VirtualBoardService;
-import com.hdu.hduvboard.service.logProcessService;
-import com.hdu.hduvboard.util.VbSysFileUtil;
-import com.hdu.hduvboard.util.VirtualBoardUtil;
+import com.hdu.vboard.entity.bo.SimulationWorkerBO;
+import com.hdu.vboard.exception.CreateWorkbenchException;
+import com.hdu.vboard.exception.MakeWorkbenchException;
+import com.hdu.vboard.service.VirtualBoardService;
+import com.hdu.vboard.service.logProcessService;
+import com.hdu.vboard.util.VbSysFileUtil;
+import com.hdu.vboard.util.VirtualBoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

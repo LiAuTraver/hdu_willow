@@ -1,4 +1,4 @@
-package com.hdu.hduvboard;
+package com.hdu.vboard;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

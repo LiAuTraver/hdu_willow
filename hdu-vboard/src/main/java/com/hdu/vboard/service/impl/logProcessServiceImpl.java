@@ -1,6 +1,6 @@
-package com.hdu.hduvboard.service.impl;
+package com.hdu.vboard.service.impl;
 
-import com.hdu.hduvboard.service.logProcessService;
+import com.hdu.vboard.service.logProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

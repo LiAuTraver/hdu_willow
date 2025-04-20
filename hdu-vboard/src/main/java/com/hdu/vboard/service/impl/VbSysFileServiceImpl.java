@@ -1,9 +1,9 @@
-package com.hdu.hduvboard.service.impl;
+package com.hdu.vboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
 import com.hdu.hdufpga.exception.InvalidFileSuffixException;
-import com.hdu.hduvboard.service.VbSysFileService;
-import com.hdu.hduvboard.util.VbSysFileUtil;
+import com.hdu.vboard.service.VbSysFileService;
+import com.hdu.vboard.util.VbSysFileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

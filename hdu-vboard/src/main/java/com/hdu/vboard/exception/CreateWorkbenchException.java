@@ -1,4 +1,4 @@
-package com.hdu.hduvboard.exception;
+package com.hdu.vboard.exception;
 
 import java.io.IOException;
 
