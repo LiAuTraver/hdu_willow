@@ -53,13 +53,12 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 //        return Result.error("不支持本方法");
 //    }
 
-    @PostMapping("/simulate")
+    @PostMapping("/build")
     @CheckToken
     public Result simulate(@RequestParam("verilogFile") MultipartFile verilogFile,
                            @RequestParam("bindFile") MultipartFile bindFile,
                            HttpServletRequest request) {
-        String token = request.getHeader("token");
-        String workspaceName = token;
+        String workspaceName = request.getHeader("token");
         try {
             log.debug("Hello to simulate");
             String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
@@ -68,15 +67,31 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
             virtualBoardService.createWorkbench(workspaceName, verilogFullPath, bindFullPath);
             log.debug("Ok to create workbench, now to check it");
             virtualBoardService.checkWorkbench(workspaceName);
-            log.debug("Ok to check workbench, now to run it");
-            virtualBoardService.runWorkbench(workspaceName);
+            return Result.ok("Ok to build the virtual board");
+        } catch (Exception e) {
+            try {
+                virtualBoardService.clearWorkbench(workspaceName);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
+            log.error(e.getMessage());
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/start")
+    @CheckToken
+    public Result simulate(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        try {
+            virtualBoardService.runWorkbench(token);
             log.debug("Now it's running!");
-            JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(workspaceName);
+            JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(token);
             log.debug(finalJson.toString());
             return Result.ok(finalJson);
         } catch (Exception e) {
             try {
-                virtualBoardService.clearWorkbench(workspaceName);
+                virtualBoardService.clearWorkbench(token);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }
@@ -90,9 +105,10 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     public Result signal(HttpServletRequest request, @RequestBody JSONObject signalJson) {
         String token = request.getHeader("token");
         try {
-            log.debug("Received input signal:"+signalJson.toString());
-            log.debug("data:"+signalJson.get("data").toString());
+            log.debug("Received input signal:" + signalJson.toString());
+            log.debug("data:" + signalJson.get("data").toString());
             virtualBoardService.sendSignal(token, signalJson.get("data").toString());
+            log.debug("output:" + signalJson.toString());
             return Result.ok(virtualBoardService.getSignalFromVirtualBoard(token));
         } catch (Exception e) {
             log.error(e.getMessage());
