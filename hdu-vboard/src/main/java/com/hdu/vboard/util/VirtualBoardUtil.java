@@ -28,7 +28,6 @@ public class VirtualBoardUtil {
             JSONObject signalData = JSONUtil.parseObj(line);
             JSONObject outputJson = new JSONObject();
             outputJson.put("data", signalData);
-            log.debug(outputJson.toString());
             return outputJson;
         } else {
             return null;
