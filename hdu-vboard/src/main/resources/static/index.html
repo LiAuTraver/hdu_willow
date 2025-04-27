@@ -118,14 +118,14 @@
     const outputDiv = document.getElementById('output');
 
     let isSimulationRunning = false;
-    const token = localStorage.getItem("token") || "mock-token"; // 从本地获取 token（你也可以改为手动填写）
+    const token = localStorage.getItem("token") || "mock-token";
 
     const setStatus = (msg, isError = false) => {
         statusDiv.textContent = msg;
         statusDiv.className = isError ? 'error' : '';
     };
 
-    // 文件上传并开始仿真
+    // 上传并构建工作台
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -142,36 +142,36 @@
         formData.append('bindFile', bindFile);
 
         try {
-            setStatus("上传文件并启动仿真中...");
-            const response = await fetch('/vb/simulate', {
+            setStatus("构建虚拟板卡中...");
+            const buildResp = await fetch('/vb/build', {
                 method: 'POST',
-                headers: {
-                    'token': token
-                },
+                headers: { 'token': token },
                 body: formData
             });
+            const buildResult = await buildResp.json();
+            if (buildResult.code !== 0) throw new Error(buildResult.msg || "构建失败");
 
-            const result = await response.json();
-            console.log(result)
-            if (result.code !== 0) {
-                throw new Error(result.msg || '仿真启动失败');
-            }
+            setStatus("构建成功，开始仿真中...");
+            const startResp = await fetch('/vb/start', {
+                method: 'POST',
+                headers: { 'token': token }
+            });
+            const startResult = await startResp.json();
+            if (startResult.code !== 0) throw new Error(startResult.msg || "启动失败");
 
             setStatus("仿真已启动。");
-            outputDiv.textContent = JSON.stringify(result.result, null, 2);
+            outputDiv.textContent = JSON.stringify(startResult.result, null, 2);
             isSimulationRunning = true;
             stopButton.style.display = "inline-block";
             sendSignalButton.style.display = "inline-block";
-
-        } catch (error) {
-            setStatus("仿真启动出错：" + error.message, true);
+        } catch (err) {
+            setStatus("仿真启动失败：" + err.message, true);
         }
     });
 
     // 发送信号
     sendSignalButton.addEventListener('click', async () => {
         let signalData;
-
         if (signalFileInput.files.length > 0) {
             const file = signalFileInput.files[0];
             signalData = await file.text();
@@ -184,12 +184,10 @@
             return;
         }
 
-        const payload = {
-            data: signalData
-        };
+        const payload = { data: signalData };
 
         try {
-            const response = await fetch('/vb/signal', {
+            const resp = await fetch('/vb/signal', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,46 +195,37 @@
                 },
                 body: JSON.stringify(payload)
             });
-
-            const result = await response.json();
-            if (result.code !== 0) {
-                throw new Error(result.msg || '发送信号失败');
-            }
+            const result = await resp.json();
+            if (result.code !== 0) throw new Error(result.msg || '发送失败');
 
             setStatus("信号发送成功。");
-            console.log(result);
             outputDiv.textContent = JSON.stringify(result.result, null, 2);
-        } catch (error) {
-            setStatus("发送信号出错：" + error.message, true);
+        } catch (err) {
+            setStatus("信号发送失败：" + err.message, true);
         }
     });
 
     // 停止仿真
     stopButton.addEventListener('click', async () => {
         try {
-            const response = await fetch('/vb/finish', {
+            const resp = await fetch('/vb/finish', {
                 method: 'POST',
-                headers: {
-                    'token': token
-                }
+                headers: { 'token': token }
             });
-
-            const result = await response.json();
-            console.log(result);
-            if (result.code !== 0) {
-                throw new Error(result.msg || '停止仿真失败');
-            }
+            const result = await resp.json();
+            if (result.code !== 0) throw new Error(result.msg || "停止失败");
 
             isSimulationRunning = false;
             setStatus("仿真已停止。");
             outputDiv.textContent = JSON.stringify(result.result, null, 2);
             stopButton.style.display = "none";
             sendSignalButton.style.display = "none";
-        } catch (error) {
-            setStatus("停止仿真出错：" + error.message, true);
+        } catch (err) {
+            setStatus("停止仿真出错：" + err.message, true);
         }
     });
 </script>
+
 
 </body>
 </html>

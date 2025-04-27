@@ -20,10 +20,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
         if input_signal != "":
             pin_bindings.append(
                 # pin[1]=>pin即可改回原来版本
-                f"""pins_map[&top->{input_signal}] = {{\n        {', '.join(f'{pin[1]}' for pin in input_pins)}\n    }};"""
-            )
-            update_from_json_calls.append(
-                f"update_input_signal_from_json(input_json, &top->{input_signal});"
+                f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in input_pins)}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
             )
 
     # 对于输出信号 绑定 更新
@@ -33,10 +30,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
 
         if output_signal != "":
             pin_bindings.append(
-                f"""pins_map[&top->{output_signal}] = {{\n        {', '.join(f'{pin[1]}' for pin in output_pins)}\n    }};"""
-            )
-            update_to_json_calls.append(
-                f"update_output_signal(&top->{output_signal});"
+                f"""output_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{output_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in output_pins)}}},\n\t\t\tsizeof(top->{output_signal})\n\t\t}}\n\t);"""
             )
 
     # 检验clk信号是否存在
@@ -59,7 +53,6 @@ def generate_main_cpp(bind_file, module_name, output_file):
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include "../../../../src/main/cpp/header/virtual_board.hh"
-#define COUNT_TIME 5'000
 
 using namespace std;
 
@@ -70,47 +63,27 @@ void bind_all_pins() {{
     {(chr(10)+chr(9)).join(pin_bindings)}
 }}
 
-// 更新所有信号
-void update_input_signals_from_json(const nlohmann::json &input_json) {{
-    {(chr(10)+chr(9)).join(update_from_json_calls)}
-}}
-
-int update_output_signals() {{
-    return {(chr(10)+'|').join(update_to_json_calls)}
-}}
-
 int main(int argc, char **argv) {{
     Verilated::commandArgs(argc, argv);
     vluint64_t main_time = 0;
 
     bind_all_pins();
     top->eval();
-    update_and_print();
+    update_output_signals();
+    print_pins_map();
 
     while (!Verilated::gotFinish()) {{
         {{        
-            nlohmann::json input_json;
-            try {{
-                if (std::cin >> input_json) {{
-                    update_input_signals_from_json(input_json);
-                }}
-            }}
-            catch (const std::exception &e) {{
-                if (std::cin.eof()) {{ // 检测 EOF
-                    break;
-                }} else {{
-                    std::cerr << "JSON Parse Error: " << e.what() << std::endl;
-                }}
-            }}
+            if (wait_for_input_and_update_input_signals())
+                break;
+            
             top->eval();
 
             update_and_print();
-            fflush(stdout);
         }}
     }}
 
     delete top;
-    std::cout << "Simulation ended gracefully." << std::endl;
     return 0;
 }}
 """
