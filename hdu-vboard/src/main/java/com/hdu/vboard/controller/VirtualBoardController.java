@@ -55,12 +55,12 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
     @PostMapping("/build")
     @CheckToken
-    public Result simulate(@RequestParam("verilogFile") MultipartFile verilogFile,
+    public Result build(@RequestParam("verilogFile") MultipartFile verilogFile,
                            @RequestParam("bindFile") MultipartFile bindFile,
                            HttpServletRequest request) {
         String workspaceName = request.getHeader("token");
         try {
-            log.debug("Hello to simulate");
+            log.debug("Hello to start");
             String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
             String bindFullPath = vbSysFileService.saveBindFile(request, bindFile);
             log.debug("Now to create virtual board");
@@ -81,7 +81,7 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
     @PostMapping("/start")
     @CheckToken
-    public Result simulate(HttpServletRequest request) {
+    public Result start(HttpServletRequest request) {
         String token = request.getHeader("token");
         try {
             virtualBoardService.runWorkbench(token);
@@ -105,10 +105,8 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     public Result signal(HttpServletRequest request, @RequestBody JSONObject signalJson) {
         String token = request.getHeader("token");
         try {
-            log.debug("Received input signal:" + signalJson.toString());
-            log.debug("data:" + signalJson.get("data").toString());
+            log.debug("Received input signal:{}", signalJson.toString());
             virtualBoardService.sendSignal(token, signalJson.get("data").toString());
-            log.debug("output:" + signalJson.toString());
             return Result.ok(virtualBoardService.getSignalFromVirtualBoard(token));
         } catch (Exception e) {
             log.error(e.getMessage());

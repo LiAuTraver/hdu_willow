@@ -217,7 +217,7 @@ void print_pins_map() {
     // 第一行单独处理
     printf("{\"L00\":%d", pins_value[L00]);
     for (int i = L01;i <= L19;++i) {
-        printf(",\"%s\":%d", pins_name[i], pins_value[i]);  // 注意前缀','
+        printf(",\"%s\":%u", pins_name[i], pins_value[i]);  // 注意前缀','
     }
     for (int i = OUTPUT00;i <= OUTPUT03;i++) {
         char hex_str[OUTPUT_HEX_MAX_BITS / BITS_PER_HEX + 1];

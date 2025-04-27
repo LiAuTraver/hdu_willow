@@ -1,6 +1,7 @@
 package com.hdu.vboard.util;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -12,9 +13,9 @@ public class VirtualBoardUtil {
         if (simInput == null) {
             throw new Exception("simInput is null");
         }
-        simInput.write(signal_json+"\n");
+        simInput.write(signal_json + "\n");
         simInput.flush();
-        log.debug("send signal to virtual board:"+signal_json);
+        log.debug("send signal to virtual board:" + signal_json);
     }
 
     public static JSONObject getSignalFromVirtualBoard(BufferedReader simOutput) throws Exception {
@@ -24,8 +25,9 @@ public class VirtualBoardUtil {
         }
         log.debug("Now to get signal from virtual board");
         if ((line = simOutput.readLine()) != null) {
+            JSONObject signalData = JSONUtil.parseObj(line);
             JSONObject outputJson = new JSONObject();
-            outputJson.put("data", line);
+            outputJson.put("data", signalData);
             return outputJson;
         } else {
             return null;

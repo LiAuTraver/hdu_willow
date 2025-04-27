@@ -69,7 +69,8 @@ int main(int argc, char **argv) {{
 
     bind_all_pins();
     top->eval();
-    update_and_print();
+    update_output_signals();
+    print_pins_map();
 
     while (!Verilated::gotFinish()) {{
         {{        
