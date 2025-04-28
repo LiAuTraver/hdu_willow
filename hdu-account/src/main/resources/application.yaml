@@ -1,8 +1,8 @@
 server:
-  port: 8081
+  port: 8080
 spring:
-  profiles:
-    active: dev
+  # profiles:
+  #   active: dev
   redis:
     host: localhost
   cloud:
@@ -11,7 +11,7 @@ spring:
         server-addr: localhost:8848
         namespace: cea83c1b-7a99-4bb1-8596-895a4faab520
   application:
-    name: hdu-interrupt
+    name: hdu-account
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
@@ -36,7 +36,7 @@ dubbo:
     name: dubbo
     port: -1
   registry:
-    address: nacos://localhost:8848?register-consumer-url=true
+    address: nacos://localhost:8848
     group: dubbo
     register-mode: interface
     parameters:

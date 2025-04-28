@@ -14,41 +14,41 @@ import java.io.IOException;
 @Service
 @Slf4j
 public class VbSysFileServiceImpl implements VbSysFileService {
-    public String saveVerilogFile(HttpServletRequest request, MultipartFile verilogFile) throws IOException {
-        String originalFileName = verilogFile.getOriginalFilename();
-        if (originalFileName == null) {
-            throw new IOException("文件为空");
-        }
-        String verilogPattern = ".*?\\.v$";
-        // 进行文件名校验，确认上传的是后缀为v的文件
-        if (originalFileName.matches(verilogPattern)) {
-            String token = request.getHeader("token");
-            String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
-            FileUtil.del(filePath);
-            VbSysFileUtil.saveFile(verilogFile, filePath);
-            log.debug("Verilog file saved to {} successfully!", filePath);
-            return filePath;
-        } else {
-            throw new InvalidFileSuffixException("文件后缀不为.v");
-        }
+  public String saveVerilogFile(HttpServletRequest request, MultipartFile verilogFile) throws IOException {
+    String originalFileName = verilogFile.getOriginalFilename();
+    if (originalFileName == null) {
+      throw new IOException("文件为空");
     }
+    String verilogPattern = ".*?\\.v$";
+    // 进行文件名校验，确认上传的是后缀为v的文件
+    if (originalFileName.matches(verilogPattern)) {
+      String token = request.getHeader("token");
+      String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
+      FileUtil.del(filePath);
+      VbSysFileUtil.saveFile(verilogFile, filePath);
+      log.debug("Verilog file saved to {} successfully!", filePath);
+      return filePath;
+    } else {
+      throw new InvalidFileSuffixException("文件后缀不为.v");
+    }
+  }
 
-    public String saveBindFile(HttpServletRequest request, MultipartFile bindFile) throws IOException {
-        String originalFileName = bindFile.getOriginalFilename();
-        if (originalFileName == null) {
-            throw new IOException("文件为空");
-        }
-        String verilogPattern = ".*?\\.json$";
-        // 进行文件名校验，确认上传的是后缀为v的文件
-        if (originalFileName.matches(verilogPattern)) {
-            String token = request.getHeader("token");
-            String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
-            FileUtil.del(filePath);
-            VbSysFileUtil.saveFile(bindFile, filePath);
-            log.debug("Bind json saved to {} successfully!", filePath);
-            return filePath;
-        } else {
-            throw new InvalidFileSuffixException("文件后缀不为.json");
-        }
+  public String saveBindFile(HttpServletRequest request, MultipartFile bindFile) throws IOException {
+    String originalFileName = bindFile.getOriginalFilename();
+    if (originalFileName == null) {
+      throw new IOException("文件为空");
     }
+    String verilogPattern = ".*?\\.json$";
+    // 进行文件名校验，确认上传的是后缀为v的文件
+    if (originalFileName.matches(verilogPattern)) {
+      String token = request.getHeader("token");
+      String filePath = VbSysFileUtil.getFullSavePath(token) + "/" + originalFileName;
+      FileUtil.del(filePath);
+      VbSysFileUtil.saveFile(bindFile, filePath);
+      log.debug("Bind json saved to {} successfully!", filePath);
+      return filePath;
+    } else {
+      throw new InvalidFileSuffixException("文件后缀不为.json");
+    }
+  }
 }

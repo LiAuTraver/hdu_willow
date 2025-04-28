@@ -11,15 +11,15 @@ import java.io.InputStreamReader;
 @Slf4j
 @Service
 public class logProcessServiceImpl implements logProcessService {
-    @Override
-    public void logProcess(Process process) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.debug(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+  @Override
+  public void logProcess(Process process) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        log.debug(line);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 }

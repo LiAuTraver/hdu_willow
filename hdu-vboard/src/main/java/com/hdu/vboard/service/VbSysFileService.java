@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 public interface VbSysFileService {
-    public String saveVerilogFile(HttpServletRequest request, MultipartFile verilogFile) throws IOException;
+  String saveVerilogFile(HttpServletRequest request, MultipartFile verilogFile) throws IOException;
 
-    public String saveBindFile(HttpServletRequest request, MultipartFile bindFile) throws IOException;
+  String saveBindFile(HttpServletRequest request, MultipartFile bindFile) throws IOException;
 }

@@ -5,8 +5,8 @@ server:
     encoding:
       charset: UTF-8
 spring:
-  profiles:
-    active: dev
+  # profiles:
+  #   active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root

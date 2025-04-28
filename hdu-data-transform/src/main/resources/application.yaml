@@ -1,8 +1,8 @@
 server:
   port: 8084
 spring:
-  profiles:
-    active: dev
+  # profiles:
+  #   active: dev
   application:
     name: hdu-data-transform
   datasource:
