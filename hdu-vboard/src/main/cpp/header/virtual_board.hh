@@ -19,7 +19,9 @@
                     L08, L09, L10, L11, L12, L13, L14, L15, \
                     L16, L17, L18, L19
 
-#define OUTPUT_SEG  OUTPUT00, OUTPUT01, OUTPUT02, OUTPUT03
+#define OUTPUT_DP   DP00, DP01, DP02, DP03, DP04, DP05
+
+#define OUTPUT_SEG  OUTPUT00, OUTPUT01, OUTPUT02, OUTPUT03, OUTPUT04, OUTPUT05
 
 #define INPUT_SW_STR    "SW00", "SW01", "SW02", "SW03", "SW04", "SW05", "SW06", "SW07", \
                         "SW08", "SW09", "SW10", "SW11", "SW12", "SW13", "SW14", "SW15", \
@@ -33,16 +35,15 @@
                         "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", \
                         "L16", "L17", "L18", "L19"
 
-#define OUTPUT_SEG_STR  "OUTPUT00", "OUTPUT01", "OUTPUT02", "OUTPUT03"
+#define OUTPUT_DP_STR   "DP00", "DP01", "DP02", "DP03", "DP04", "DP05"
+
+#define OUTPUT_SEG_STR  "OUTPUT00", "OUTPUT01", "OUTPUT02", "OUTPUT03", "OUTPUT04", "OUTPUT05"
 
 // 输入输出框位数
 #define INPUT_HEX_MAX_BITS 32
+#define DP_MAX_BITS 8
 #define OUTPUT_HEX_MAX_BITS 32
 #define BITS_PER_HEX 4
-
-const static char *pins_name[] = {
-    "CLK",INPUT_SW_STR,INPUT_SWB_STR,INPUT_HEX_STR,OUTPUT_LED_STR,OUTPUT_SEG_STR
-};
 
 enum PINS {
     CLK,
@@ -51,8 +52,19 @@ enum PINS {
     INPUT_HEX,
 
     OUTPUT_LED,
+    OUTPUT_DP,
     OUTPUT_SEG,
     PINS_LEN
+};
+
+const static char *pins_name[] = {
+    "CLK",
+    INPUT_SW_STR,
+    INPUT_SWB_STR,
+    INPUT_HEX_STR,
+    OUTPUT_LED_STR,
+    OUTPUT_DP_STR,
+    OUTPUT_SEG_STR
 };
 
 // 利用结构体替换map结构
@@ -188,6 +200,16 @@ int update_output_signals() {
                 }
                 change_flag = change_flag || (new_value ^ pins_value[*p]);
                 pins_value[*p] = new_value;
+            } else if (*p >= DP00 && *p <= DP05) {
+                unsigned int new_value = 0;
+                for (int i = 0;i < DP_MAX_BITS && byte_idx < pin.max_byte;i++) {
+                    new_value = new_value | (((byte_ptr[byte_idx] >> bit_idx) & 1) << i);
+                    ++bit_idx;
+                    byte_idx += bit_idx / 8;
+                    bit_idx %= 8;
+                }
+                change_flag = change_flag || (new_value ^ pins_value[*p]);
+                pins_value[*p] = new_value;
             } else {
                 int new_value = (byte_ptr[byte_idx] >> bit_idx) & 1;
                 change_flag = change_flag || (new_value ^ pins_value[*p]);  // 用逻辑运算短路提高效率
@@ -215,9 +237,17 @@ int update_output_signals();
 void print_pins_map() {
     // 因为json不允许多余','
     // 第一行单独处理
-    printf("{\"L00\":%d", pins_value[L00]);
+    printf("{\"L00\":%u", pins_value[L00]);
     for (int i = L01;i <= L19;++i) {
         printf(",\"%s\":%u", pins_name[i], pins_value[i]);  // 注意前缀','
+    }
+    for (int i = DP00;i <= DP05;i++) {
+        printf(",\"%s\":", pins_name[i]);  // 注意前缀','
+        unsigned int value = pins_value[i];
+        for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
+            printf("%d", (value >> bit_idx) & 1);
+        }
+
     }
     for (int i = OUTPUT00;i <= OUTPUT03;i++) {
         char hex_str[OUTPUT_HEX_MAX_BITS / BITS_PER_HEX + 1];

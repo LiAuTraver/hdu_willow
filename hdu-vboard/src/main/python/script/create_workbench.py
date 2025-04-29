@@ -71,6 +71,7 @@ int main(int argc, char **argv) {{
     top->eval();
     update_output_signals();
     print_pins_map();
+    fflush(stdout);
 
     while (!Verilated::gotFinish()) {{
         {{        
