@@ -52,7 +52,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
 #include <atomic>
 #include <nlohmann/json.hpp>
 #include <chrono>
-#include "../../../../src/main/cpp/header/virtual_board.hh"
+#include "../../../../src/main/cpp/header/vboard.hh"
 
 using namespace std;
 
