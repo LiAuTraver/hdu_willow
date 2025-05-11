@@ -9,4 +9,6 @@ public interface TokenService {
     Boolean checkToken(String token) throws Exception;
 
     UserConnectionVO reload(String token) throws Exception;
+
+    UserVO getUserIdFromToken(String token);
 }
