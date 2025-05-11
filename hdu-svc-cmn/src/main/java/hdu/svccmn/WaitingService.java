@@ -1,7 +1,6 @@
-package com.hdu.hdufpga.service;
+package hdu.svccmn;
 
 import com.hdu.hdufpga.entity.Result;
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
 
 public interface WaitingService {
     UserConnectionVO userInQueue(String token) throws Exception;

@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.service;
+package hdu.svccmn;
 
 import com.hdu.hdufpga.entity.vo.UserVO;
 

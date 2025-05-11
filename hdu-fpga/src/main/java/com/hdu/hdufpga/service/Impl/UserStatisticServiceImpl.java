@@ -3,7 +3,7 @@ package com.hdu.hdufpga.service.Impl;
 import com.hdu.hdufpga.entity.po.UserPO;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.hdufpga.service.UserService;
-import com.hdu.hdufpga.service.UserStatisticService;
+import hdu.svccmn.UserStatisticService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

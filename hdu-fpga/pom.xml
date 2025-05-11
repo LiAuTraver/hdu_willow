@@ -83,12 +83,10 @@
 			<groupId>com.alibaba.nacos</groupId>
 			<artifactId>nacos-client</artifactId>
 		</dependency>
-		<!--  todo: UserServiceImpl was defined in this pkg, so dep inject failed if not add this -->
 		<dependency>
 			<groupId>com.hdu</groupId>
-			<artifactId>hdu-account</artifactId>
+			<artifactId>hdu-svc-cmn</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

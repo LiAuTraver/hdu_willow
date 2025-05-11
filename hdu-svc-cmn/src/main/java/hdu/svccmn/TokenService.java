@@ -1,7 +1,6 @@
-package com.hdu.hdufpga.service;
+package hdu.svccmn;
 
 import com.hdu.hdufpga.entity.vo.UserVO;
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
 
 public interface TokenService {
     String generateToken(UserVO userVO) throws Exception;
