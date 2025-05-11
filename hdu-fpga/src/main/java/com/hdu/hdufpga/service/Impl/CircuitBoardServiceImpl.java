@@ -18,9 +18,9 @@ import com.hdu.hdufpga.netty.NettySocketHolder;
 import com.hdu.hdufpga.service.*;
 import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.hdufpga.utils.CircuitBoardUtil;
+import com.hdu.hdufpga.service.UserStatisticService;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,8 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapper, CircuitBoardPO> implements CircuitBoardService {
+public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapper, CircuitBoardPO>
+    implements CircuitBoardService {
   @Resource
   CbUseRecordService cbUseRecordService;
 
@@ -41,9 +42,6 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Resource
   RedisUtil redisUtil;
-
-  @Resource
-  TokenService tokenService;
 
   @Resource
   UserStatisticService userStatisticService;
@@ -91,7 +89,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
           ChannelHandlerContext ctx = NettySocketHolder.getCtx(e.getLongId());
           CircuitBoardUtil.sendEndToCB(ctx);
           HashMap<String, Object> CBInfo = NettySocketHolder.getInfo(e.getLongId());
-          if (Validator.isNull(CBInfo)) CBInfo = new HashMap<>();
+          if (Validator.isNull(CBInfo))
+            CBInfo = new HashMap<>();
           CBInfo.put(CircuitBoardConstant.STATUS, false);
           CBInfo.put(CircuitBoardConstant.IS_RECORDED, false);
           CBInfo.remove(CircuitBoardConstant.FILE_PATH);
@@ -123,8 +122,10 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
     LambdaQueryWrapper<CircuitBoardPO> wrapper = new LambdaQueryWrapper<>();
     wrapper.eq(CircuitBoardPO::getLongId, longId);
     List<CircuitBoardPO> list = baseMapper.selectList(wrapper);
-    if (!list.isEmpty()) return list.get(0);
-    else return null;
+    if (!list.isEmpty())
+      return list.get(0);
+    else
+      return null;
   }
 
   @Override
@@ -144,7 +145,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Override
   public void recordBitToBitForTheFirstTime(String token, String filePath) {
-    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+    UserConnectionVO userConnectionVO = (UserConnectionVO)
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token);
     String longId = userConnectionVO.getLongId();
     if (Validator.isNotNull(longId) && !longId.isEmpty()) {
       // 获取缓存中对应的ChannelHandlerContext
@@ -164,7 +166,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Override
   public Boolean clearUserRedisAndFreeCB(String token) throws CircuitBoardException, SQLException {
-    UserConnectionVO connectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+    UserConnectionVO connectionVO = (UserConnectionVO)
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token);
     if (Validator.isNull(connectionVO)) {
       return false;
     }
@@ -176,7 +179,7 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
     }
 
     // save user exp time
-    UserVO userIdFromToken = tokenService.getUserIdFromToken(token);
+    UserVO userIdFromToken = userStatisticService.getUserByToken(token);
     if (userIdFromToken == null)
       log.error("an unexpect error has occurred: user with token {} is null", token);
     else {
@@ -191,8 +194,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
       }
     }
 
-
-    redisUtil.del(RedisConstant.REDIS_CONN_PREFIX + token, RedisConstant.REDIS_TTL_PREFIX + token, RedisConstant.REDIS_CONN_SHADOW_PREFIX + token);
+    redisUtil.del(RedisConstant.REDIS_CONN_PREFIX + token, RedisConstant.REDIS_TTL_PREFIX + token,
+        RedisConstant.REDIS_CONN_SHADOW_PREFIX + token);
     redisUtil.removeInZSet(queueName, token);
     log.info("用户{}使用信息已保存，redis记录已清除", token);
     circuitBoardHistoryOperationService.clearSteps(token);
@@ -205,7 +208,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
   public Boolean getRecordStatus(String token, String cbIp) throws CircuitBoardException {
     CircuitBoardPO circuitBoardPO = getCircuitBoardByIp(cbIp);
     if (Validator.isNotNull(circuitBoardPO)) {
-      Boolean isRecorded = (Boolean) NettySocketHolder.getValue(circuitBoardPO.getLongId(), CircuitBoardConstant.IS_RECORDED);
+      Boolean isRecorded = (Boolean) NettySocketHolder.getValue(circuitBoardPO.getLongId(),
+          CircuitBoardConstant.IS_RECORDED);
       if (Validator.isNotNull(isRecorded)) {
         return isRecorded;
       } else {
@@ -217,8 +221,10 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
   }
 
   @Override
-  public Boolean sendButtonString(String token, String switchButtonStatus, String tapButtonStatus) throws CircuitBoardException {
-    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+  public Boolean sendButtonString(String token, String switchButtonStatus, String tapButtonStatus)
+      throws CircuitBoardException {
+    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class,
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
     String longId = userConnectionVO.getLongId();
     // 处理字符串
     String finalString = CircuitBoardUtil.processButtonString(switchButtonStatus, tapButtonStatus);
@@ -237,7 +243,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Override
   public String getLightString(String token) throws CircuitBoardException {
-    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class,
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
     String longId = userConnectionVO.getLongId();
     String lightString = (String) NettySocketHolder.getValue(longId, CircuitBoardConstant.LIGHT_STATUS);
     if (Validator.isNotNull(lightString)) {
@@ -249,7 +256,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Override
   public String getNixieTubeString(String token) throws CircuitBoardException {
-    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class,
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
     String longId = userConnectionVO.getLongId();
     String nixieTubeString = (String) NettySocketHolder.getValue(longId, CircuitBoardConstant.NIXIE_TUBE_STATUS);
     if (Validator.isNotNull(nixieTubeString)) {
@@ -261,7 +269,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
 
   @Override
   public String getProcessedBtnStr(String token) throws CircuitBoardException {
-    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class, redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
+    UserConnectionVO userConnectionVO = Convert.convert(UserConnectionVO.class,
+        redisUtil.get(RedisConstant.REDIS_CONN_PREFIX + token));
     String longId = userConnectionVO.getLongId();
     String buttonString = (String) NettySocketHolder.getValue(longId, CircuitBoardConstant.BUTTON_STATUS);
     if (Validator.isNotNull(buttonString)) {

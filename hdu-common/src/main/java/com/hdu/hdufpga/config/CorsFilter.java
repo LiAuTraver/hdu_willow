@@ -32,8 +32,8 @@ public class CorsFilter implements Filter {
         // 允许的请求头
         response.setHeader("Access-Control-Allow-Headers", "x-requested-with, satoken, Content-Type, Authorization");
 
-        // 允许前端访问的自定义响应头
-        response.setHeader("Access-Control-Expose-Headers", "uuid");
+//        // 允许前端访问的自定义响应头
+//        response.setHeader("Access-Control-Expose-Headers", "uuid");
 
         // 允许携带 Cookie
         response.setHeader("Access-Control-Allow-Credentials", "true");
