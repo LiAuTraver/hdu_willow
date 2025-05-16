@@ -24,7 +24,7 @@
     <module>hdu-vboard</module>
 	  <module>hdu-svc-cmn</module>
   </modules>
-  <!-- <profiles>
+  <profiles>
 		<profile>
 			<id>dev</id>
 			<activation>
@@ -40,7 +40,7 @@
 				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>
 		</profile>
-	</profiles> -->
+	</profiles>
   <properties>
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
