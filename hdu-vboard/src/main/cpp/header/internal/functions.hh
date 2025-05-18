@@ -75,7 +75,7 @@ inline int update_output_signals() {
         int bit_idx = 0;
         for (auto p = pin.pins_vec.begin();p != pin.pins_vec.end();p++) {
             if (byte_idx >= pin.max_byte)  break;
-            if (*p >= OUTPUT00 && *p <= OUTPUT03) {
+            if (*p >= OUTPUT0 && *p <= OUTPUT3) {
                 unsigned int new_value = 0;
                 // 内循环会超， 需要判断
                 for (int i = 0;i < OUTPUT_HEX_MAX_BITS && byte_idx < pin.max_byte;i++) {
@@ -132,9 +132,9 @@ inline void print_pins_map() {
         printf("\"");
         // OUTPUT七段管信号
     }
-    for (int i = OUTPUT00;i <= OUTPUT05;i++) {
+    for (int i = OUTPUT0;i <= OUTPUT5;i++) {
         char hex_str[OUTPUT_HEX_MAX_BITS / BITS_PER_HEX + 1];
-        sprintf(hex_str, "%08x", pins_value[i]);
+        sprintf(hex_str, "%08X", pins_value[i]);
         printf(",\"%s\":\"%s\"", pins_name[i], hex_str);
     }
     printf("}\n");

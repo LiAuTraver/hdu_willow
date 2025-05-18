@@ -11,24 +11,24 @@ import javax.annotation.Resource;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
-  @Resource
-  private VisitCountInterceptor visitCountInterceptor;
+//    @Resource
+//    private VisitCountInterceptor visitCountInterceptor;
+//
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(visitCountInterceptor).addPathPatterns("/**");
+//    }
 
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(visitCountInterceptor).addPathPatterns("/**");
-  }
-
-  @Value("${cors.allowed-origins}")
-  private String[] allowedOrigins;
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
 
 
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
-        .allowedOrigins(allowedOrigins)
-        .allowedMethods("POST", "GET", "OPTIONS", "DELETE", "PUT")
-        .allowedHeaders("x-requested-with", "satoken", "Content-Type", "Authorization")
-        .allowCredentials(true);
-  }
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins(allowedOrigins)
+                .allowedMethods("POST", "GET", "OPTIONS", "DELETE", "PUT")
+                .allowedHeaders("x-requested-with", "satoken", "Content-Type", "Authorization", "token")
+                .allowCredentials(true);
+    }
 }

@@ -61,6 +61,7 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     String workspaceName = request.getHeader("token");
     try {
       log.debug("Hello to start");
+//      log.debug("token:{},type:{}", workspaceName,workspaceName.getClass());
       String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
       String bindFullPath = vbSysFileService.saveBindFile(request, bindFile);
       log.debug("Now to create virtual board");
