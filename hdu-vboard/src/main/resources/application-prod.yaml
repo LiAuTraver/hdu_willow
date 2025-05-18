@@ -56,3 +56,6 @@ dubbo:
 logging:
   level:
     com.hdu.vboard: debug
+cors:
+  allowed-origins:
+    "TODO"

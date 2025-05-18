@@ -36,8 +36,10 @@ build/
 
 ### Gradle ###
 .gradle/
-build/
 
 ### Temporary ###
 *.kts
 *.tar
+
+### Whatsit ###
+notes.txt

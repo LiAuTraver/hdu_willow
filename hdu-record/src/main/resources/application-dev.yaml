@@ -45,3 +45,6 @@ rocketmq:
   name-server: localhost:9876
   producer:
     group: hdu-record-group
+cors:
+  allowed-origins:
+    "http://localhost:5173"

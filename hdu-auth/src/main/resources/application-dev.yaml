@@ -40,3 +40,6 @@ seata:
       hdu-auth-seata-service-group: default
     grouplist:
       default: localhost:8091
+cors:
+  allowed-origins:
+    "http://localhost:5173"
