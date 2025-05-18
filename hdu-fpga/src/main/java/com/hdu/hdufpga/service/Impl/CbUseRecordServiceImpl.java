@@ -3,7 +3,7 @@ package com.hdu.hdufpga.service.Impl;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.po.CbUseRecordPO;
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
+import hdu.svccmn.UserConnectionVO;
 import com.hdu.hdufpga.mapper.CbUseRecordMapper;
 import com.hdu.hdufpga.service.CbUseRecordService;
 import com.hdu.hdufpga.util.TimeUtil;

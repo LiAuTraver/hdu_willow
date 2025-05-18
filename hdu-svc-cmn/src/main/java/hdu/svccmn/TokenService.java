@@ -1,6 +1,5 @@
-package com.hdu.hdufpga.service;
+package hdu.svccmn;
 
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
 import com.hdu.hdufpga.entity.vo.UserVO;
 
 public interface TokenService {
@@ -9,6 +8,4 @@ public interface TokenService {
     Boolean checkToken(String token) throws Exception;
 
     UserConnectionVO reload(String token) throws Exception;
-
-    UserVO getUserIdFromToken(String token);
 }

@@ -3,19 +3,19 @@ package com.hdu.hdufpga.service.Impl;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
+import hdu.svccmn.UserConnectionVO;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.hdufpga.exception.IdentifyException;
 import com.hdu.hdufpga.exception.NullTokenException;
 import com.hdu.hdufpga.exception.TokenExpiredException;
-import com.hdu.hdufpga.service.TokenService;
-import com.hdu.hdufpga.service.WaitingService;
+import hdu.svccmn.TokenService;
+import hdu.svccmn.UserStatisticService;
+import hdu.svccmn.WaitingService;
 import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.hdufpga.utils.ParamUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,8 +26,8 @@ public class TokenServiceImpl implements TokenService {
   @Resource
   WaitingService waitingService;
 
-  // fixme: this is not a good choice
-  private final ConcurrentHashMap<String, UserVO> tokTable = new ConcurrentHashMap<>();
+  @Resource
+  UserStatisticService userStatisticService;
 
   @Override
   public String generateToken(UserVO userVO) throws IdentifyException {
@@ -39,7 +39,7 @@ public class TokenServiceImpl implements TokenService {
       }
       redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
       redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-      tokTable.put(token, userVO);
+      userStatisticService.storeUserByToken(token, userVO);
       return token;
     }
     throw new IdentifyException("身份信息有误");
@@ -49,11 +49,6 @@ public class TokenServiceImpl implements TokenService {
   public UserConnectionVO reload(String token) throws Exception {
     redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
     return waitingService.userInQueue(token);
-  }
-
-  @Override
-  public UserVO getUserIdFromToken(String token) {
-    return tokTable.get(token);
   }
 
   @Override

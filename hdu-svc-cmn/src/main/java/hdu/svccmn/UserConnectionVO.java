@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.entity.vo;
+package hdu.svccmn;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

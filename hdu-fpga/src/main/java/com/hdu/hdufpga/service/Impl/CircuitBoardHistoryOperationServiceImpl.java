@@ -4,7 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
-import com.hdu.hdufpga.entity.vo.UserConnectionVO;
+import hdu.svccmn.UserConnectionVO;
 import com.hdu.hdufpga.exception.EmptyHistoryStepsException;
 import com.hdu.hdufpga.netty.NettySocketHolder;
 import com.hdu.hdufpga.service.CircuitBoardHistoryOperationService;
@@ -14,7 +14,6 @@ import com.hdu.hdufpga.utils.SysFileUtil;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

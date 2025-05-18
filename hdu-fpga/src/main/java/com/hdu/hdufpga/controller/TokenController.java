@@ -3,7 +3,7 @@ package com.hdu.hdufpga.controller;
 import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
 import com.hdu.hdufpga.entity.vo.UserVO;
-import com.hdu.hdufpga.service.TokenService;
+import hdu.svccmn.TokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

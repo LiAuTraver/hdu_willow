@@ -3,7 +3,7 @@ package com.hdu.hdufpga.service.Impl;
 import com.hdu.hdufpga.entity.po.UserPO;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.hdufpga.service.UserService;
-import com.hdu.hdufpga.service.UserStatisticService;
+import hdu.svccmn.UserStatisticService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,12 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
 public class UserStatisticServiceImpl implements UserStatisticService {
   @Resource
   private UserService userService;
+
+  private final ConcurrentHashMap<String, UserVO> tokTable = new ConcurrentHashMap<>();
 
   @Override
   @Transactional
@@ -52,5 +55,14 @@ public class UserStatisticServiceImpl implements UserStatisticService {
         userVO.getUsername(), expTimeInMillis);
 
   }
-}
 
+  @Override
+  public void storeUserByToken(String token, UserVO userVO) {
+    tokTable.put(token, userVO);
+  }
+
+  @Override
+  public UserVO getUserByToken(String token) {
+    return tokTable.get(token);
+  }
+}
