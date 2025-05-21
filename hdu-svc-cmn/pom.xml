@@ -10,11 +10,11 @@
 	</parent>
 	<dependencies>
 		<!--  todo: UserServiceImpl was defined in this pkg, so dep inject failed if not add this -->
-		<dependency>
-			<groupId>com.hdu</groupId>
-			<artifactId>hdu-account</artifactId>
-			<version>0.0.1</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.hdu</groupId>-->
+<!--			<artifactId>hdu-account</artifactId>-->
+<!--			<version>0.0.1</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>com.hdu</groupId>
 			<artifactId>hdu-account-api</artifactId>

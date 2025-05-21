@@ -6,17 +6,16 @@ import com.hdu.hdufpga.service.UserService;
 import hdu.svccmn.UserStatisticService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
 public class UserStatisticServiceImpl implements UserStatisticService {
-  @Resource
+  @DubboReference(check = false)
   private UserService userService;
 
   private final ConcurrentHashMap<String, UserVO> tokTable = new ConcurrentHashMap<>();
