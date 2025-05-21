@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.exception;
+package hdu.svccmn.exception;
 
 import java.io.IOException;
 

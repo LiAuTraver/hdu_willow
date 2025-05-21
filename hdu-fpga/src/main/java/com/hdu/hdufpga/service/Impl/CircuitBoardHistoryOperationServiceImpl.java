@@ -5,7 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
 import hdu.svccmn.UserConnectionVO;
-import com.hdu.hdufpga.exception.EmptyHistoryStepsException;
+import hdu.svccmn.exception.EmptyHistoryStepsException;
 import com.hdu.hdufpga.netty.NettySocketHolder;
 import com.hdu.hdufpga.service.CircuitBoardHistoryOperationService;
 import com.hdu.hdufpga.util.RedisUtil;

@@ -7,7 +7,7 @@ import com.hdu.hdufpga.entity.Result;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.po.CircuitBoardPO;
 import hdu.svccmn.UserConnectionVO;
-import com.hdu.hdufpga.exception.UserQueueException;
+import hdu.svccmn.exception.UserQueueException;
 import com.hdu.hdufpga.service.CircuitBoardService;
 import hdu.svccmn.WaitingService;
 import com.hdu.hdufpga.util.RedisUtil;

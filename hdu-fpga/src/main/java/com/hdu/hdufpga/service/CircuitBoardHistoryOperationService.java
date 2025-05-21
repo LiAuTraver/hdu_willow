@@ -1,6 +1,6 @@
 package com.hdu.hdufpga.service;
 
-import com.hdu.hdufpga.exception.EmptyHistoryStepsException;
+import hdu.svccmn.exception.EmptyHistoryStepsException;
 
 public interface CircuitBoardHistoryOperationService {
     void clearSteps(String token);

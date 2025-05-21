@@ -36,7 +36,7 @@ public class Result implements Serializable {
     }
 
     public static Result error() {
-        return error(500, "未知异常，请联系管理员");
+        return error(500, "unknown error");
     }
 
     public static Result error(String msg) {

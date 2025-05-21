@@ -1,7 +1,7 @@
 package com.hdu.vboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
-import com.hdu.hdufpga.exception.InvalidFileSuffixException;
+import hdu.svccmn.exception.InvalidFileSuffixException;
 import com.hdu.vboard.service.VbSysFileService;
 import com.hdu.vboard.util.VbSysFileUtil;
 import lombok.extern.slf4j.Slf4j;

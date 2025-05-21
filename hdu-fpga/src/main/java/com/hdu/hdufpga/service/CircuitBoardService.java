@@ -2,7 +2,7 @@ package com.hdu.hdufpga.service;
 
 import com.github.yulichang.base.MPJBaseService;
 import com.hdu.hdufpga.entity.po.CircuitBoardPO;
-import com.hdu.hdufpga.exception.CircuitBoardException;
+import hdu.svccmn.exception.CircuitBoardException;
 
 import java.sql.SQLException;
 

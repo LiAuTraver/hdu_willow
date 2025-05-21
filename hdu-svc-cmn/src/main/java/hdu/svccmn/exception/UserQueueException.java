@@ -1,4 +1,4 @@
-package com.hdu.hdufpga.exception;
+package hdu.svccmn.exception;
 
 public class UserQueueException extends Exception {
     public UserQueueException(String s) {

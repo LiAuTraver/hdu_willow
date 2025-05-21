@@ -12,7 +12,7 @@ import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.po.CircuitBoardPO;
 import hdu.svccmn.UserConnectionVO;
 import com.hdu.hdufpga.entity.vo.UserVO;
-import com.hdu.hdufpga.exception.CircuitBoardException;
+import hdu.svccmn.exception.CircuitBoardException;
 import com.hdu.hdufpga.mapper.CircuitBoardMapper;
 import com.hdu.hdufpga.netty.NettySocketHolder;
 import com.hdu.hdufpga.service.*;
