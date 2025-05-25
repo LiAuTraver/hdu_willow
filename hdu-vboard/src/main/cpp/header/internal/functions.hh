@@ -86,7 +86,7 @@ inline int update_output_signals() {
                 }
                 change_flag = change_flag || (new_value ^ pins_value[*p]);
                 pins_value[*p] = new_value;
-            } else if (*p >= DP00 && *p <= DP05) {
+            } else if (*p >= DP0 && *p <= DP5) {
                 unsigned int new_value = 0;
                 for (int i = 0;i < DP_MAX_BITS && byte_idx < pin.max_byte;i++) {
                     new_value = new_value | (((byte_ptr[byte_idx] >> bit_idx) & 1) << i);
@@ -123,7 +123,7 @@ inline void print_pins_map() {
         printf(",\"%s\":%u", pins_name[i], pins_value[i]);  // 注意前缀','
     }
     // DP信号
-    for (int i = DP00;i <= DP05;i++) {
+    for (int i = DP0;i <= DP5;i++) {
         printf(",\"%s\":\"", pins_name[i]);  // 注意前缀','
         unsigned int value = pins_value[i];
         for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
@@ -167,7 +167,7 @@ inline void update_and_print() {
     if (update_output_signals()) {
         print_pins_map();
     } else {
-        printf("\n");
+        printf("{}\n");
     }
     fflush(stdout);
 }

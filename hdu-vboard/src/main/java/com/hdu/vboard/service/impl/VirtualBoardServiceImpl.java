@@ -15,11 +15,12 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.*;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 public class VirtualBoardServiceImpl implements VirtualBoardService {
-    final HashMap<String, SimulationWorkerBO> simulationWorkers = new HashMap<>();
+    final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
 
     @Resource
     logProcessService logProcessService;
@@ -95,8 +96,8 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         BufferedWriter simInput = new BufferedWriter(new OutputStreamWriter(simProcess.getOutputStream()));
         BufferedReader simOutput = new BufferedReader(new InputStreamReader(simProcess.getInputStream()));
 
-        SimulationWorkerBO simulationWorkerBO = new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput,
-                true);
+        SimulationWorkerBO simulationWorkerBO =
+                new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput, true);
         log.info("Simulation process started for workspace: {}", workspaceName);
         simulationWorkers.put(workspaceName, simulationWorkerBO);
         return simulationWorkerBO;

@@ -13,7 +13,7 @@
                     L08, L09, L10, L11, L12, L13, L14, L15, \
                     L16, L17, L18, L19
 
-#define OUTPUT_DP   DP00, DP01, DP02, DP03, DP04, DP05
+#define OUTPUT_DP   DP0, DP1, DP2, DP3, DP4, DP5
 
 #define OUTPUT_SEG  OUTPUT0, OUTPUT1, OUTPUT2, OUTPUT3, OUTPUT4, OUTPUT5
 
