@@ -14,7 +14,6 @@ import hdu.svccmn.WaitingService;
 import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.hdufpga.utils.ParamUtil;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 

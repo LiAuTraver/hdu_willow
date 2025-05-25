@@ -29,6 +29,12 @@ spring:
             - Path=/fpga/**
           filters:
             - StripPrefix=1
+        - id: hdu-vboard
+          uri: lb://hdu-vboard
+          predicates:
+            - Path=/vboard/**
+          filters:
+            - StripPrefix=1
       globalcors: #cross-domain configuration
         cors-configurations:
           '[/**]':
