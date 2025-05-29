@@ -38,7 +38,11 @@ inline void update_input_signals_from_json(const nlohmann::json &input_json) {
             // INPUT类型单独处理
             if (*p >= INPUT0 && *p <= INPUT3) {
                 std::string hex_str = input_json[pin_name];
-                unsigned int hex_num = std::stoul(hex_str, nullptr, 16);
+                unsigned int hex_num;
+                if (!hex_str.empty())
+                    hex_num = std::stoul(hex_str, nullptr, 16);
+                else
+                    hex_num = 0;
                 // 内循环可能会超 要判断
                 while (hex_num && byte_idx < pin.max_byte) {
                     if (hex_num & 1)
