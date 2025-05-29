@@ -48,11 +48,11 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     log.debug("workbench path:{}", VbSysFileUtil.getFullWorkbenchPath(""));
 
     Process createProcess = builder.start();
-    logProcessService.logProcess(createProcess);
+//    logProcessService.logProcess(createProcess);
     int exitCode = createProcess.waitFor();
     if (exitCode != 0) {
       FileUtil.del(VbSysFileUtil.getFullWorkbenchPath(workspaceName));
-      throw new CreateWorkbenchException("Error creating simulation workspace, clear \" " + workspaceName);
+      throw new CreateWorkbenchException("Error creating simulation workspace, clear!" );
     }
     log.debug("Success creating workbench");
     return true;
@@ -69,13 +69,18 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     runBuilder.redirectErrorStream(true);
 
     Process process = runBuilder.start();
-    logProcessService.logProcess(process);
+//    logProcessService.logProcess(process);
     BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
     int exitCode = process.waitFor();
     if (exitCode != 0) {
-      String errMsg = "Error making workbench: " + reader;
-      throw new MakeWorkbenchException(errMsg);
+      StringBuilder errMsg = new StringBuilder("Error making workbench: ");
+      String line;
+      while ((line = reader.readLine()) != null) {
+        errMsg.append(line).append("\n");
+      }
+
+      throw new MakeWorkbenchException(errMsg.toString());
     }
     return true;
   }
