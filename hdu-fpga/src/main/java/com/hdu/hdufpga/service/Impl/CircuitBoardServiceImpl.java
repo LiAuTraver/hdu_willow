@@ -11,7 +11,6 @@ import com.hdu.hdufpga.entity.constant.CircuitBoardConstant;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.po.CircuitBoardPO;
 import hdu.svccmn.UserConnectionVO;
-import com.hdu.hdufpga.entity.vo.UserVO;
 import hdu.svccmn.exception.CircuitBoardException;
 import com.hdu.hdufpga.mapper.CircuitBoardMapper;
 import com.hdu.hdufpga.netty.NettySocketHolder;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 
@@ -178,21 +176,8 @@ public class CircuitBoardServiceImpl extends MPJBaseServiceImpl<CircuitBoardMapp
       throw new CircuitBoardException("释放板卡失败");
     }
 
-    // save user exp time
-    UserVO userIdFromToken = userStatisticService.getUserByToken(token);
-    if (userIdFromToken == null)
-      log.error("an unexpect error has occurred: user with token {} is null", token);
-    else {
-      final Long sTime = (Long) redisUtil.get(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token);
-      long curTime = System.currentTimeMillis();
-
-      if (sTime == null || sTime <= 0 || sTime >= curTime)
-        log.error("an unexpect error has occurred: user with token {} has no exp time", token);
-      else {
-        userStatisticService.updateUserExpTime(userIdFromToken, Duration.ofMillis(curTime - sTime));
-        redisUtil.del(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token);
-      }
-    }
+    userStatisticService.updateUserExptime(token, (Long) redisUtil.get(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token));
+    redisUtil.del(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token);
 
     redisUtil.del(RedisConstant.REDIS_CONN_PREFIX + token, RedisConstant.REDIS_TTL_PREFIX + token,
         RedisConstant.REDIS_CONN_SHADOW_PREFIX + token);
