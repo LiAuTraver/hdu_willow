@@ -12,8 +12,9 @@ import hdu.svccmn.TokenService;
 import hdu.svccmn.UserStatisticService;
 import hdu.svccmn.WaitingService;
 import com.hdu.hdufpga.util.RedisUtil;
-import com.hdu.hdufpga.utils.ParamUtil;
+import hdu.svccmn.ParamUtil;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
@@ -30,18 +31,16 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public String generateToken(UserVO userVO) throws IdentifyException {
-    if (ParamUtil.CheckUserInfoLegal(userVO)) { // 检查传递的userVO参数是否为空
-      String salt = IdUtil.simpleUUID(); // 随机生成一个uuid
-      String token = ParamUtil.generateUserToken(userVO, salt); //生成token
-      if (Validator.isNull(token)) {
-        throw new IdentifyException("身份信息有误");
-      }
-      redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-      redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-      userStatisticService.storeUserByToken(token, userVO);
-      return token;
-    }
-    throw new IdentifyException("身份信息有误");
+    if (!ParamUtil.CheckUserInfoLegal(userVO)) {
+      throw new IdentifyException("身份信息有误");
+    }// 检查传递的userVO参数是否为空
+    String salt = IdUtil.simpleUUID(); // 随机生成一个uuid
+    String token = ParamUtil.generateUserToken(userVO, salt); //生成token
+    redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
+    redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
+    userStatisticService.storeUserByToken(token, userVO);
+    return token;
+
   }
 
   @Override
