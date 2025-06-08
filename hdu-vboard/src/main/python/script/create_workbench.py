@@ -9,8 +9,6 @@ def generate_main_cpp(bind_file, module_name, output_file):
         bind_data = json.load(f)
 
     pin_bindings = []
-    update_from_json_calls = []
-    update_to_json_calls = []
 
     # 对于输入信号 绑定 读取 更新
     for input_entry in bind_data["inputRows"]:
@@ -38,10 +36,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
         input_signal = bind_data["CLK"]
         pin_bindings.append(
             # pin[1]=>pin即可改回原来版本
-            f"""pins_map[&top->{input_signal}] = {{CLK}};"""
-        )
-        update_from_json_calls.append(
-            f"update_input_signal_from_json(input_json, &top->{input_signal});"
+            f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{"CLK"}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
         )
 
     # 生成 main.cpp 的内容
@@ -157,29 +152,34 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
-# 搜索项目的 Verilog 和 C/C++ 源文件
-VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
-# CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-CSRCS = $(abspath ./csrc/main.cpp)
 # 默认目标
 default: $(BIN)
 
 # 创建构建目录（如果不存在）
 $(shell mkdir -p $(BUILD_DIR))
 
-# Verilator 编译规则
-INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+# 搜索项目的 Verilog 和 main.cpp
+# 只指定顶层 Verilog 源文件，其余通过 `include` 实现
+VTOP_V = $(abspath ./vsrc/$(TOPNAME).v)
+CSRCS = $(abspath ./csrc/main.cpp)
+
+# C/C++ 编译器标志
+INCFLAGS = $(addprefix -I, $(INC_PATH)) -I./vsrc
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="V$(TOPNAME)"
 
 # 生成二进制文件的规则
-$(BIN): $(VSRCS) $(CSRCS)
+$(BIN): $(VTOP_V) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)
-	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
-		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
-		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
+	$(VERILATOR) $(VERILATOR_CFLAGS) -I./vsrc \
+        --top-module $(TOPNAME) $^ \
+    	$(addprefix -CFLAGS , $(CXXFLAGS)) \
+  		$(addprefix -LDFLAGS , $(LDFLAGS)) \
+        --Mdir $(OBJ_DIR) \
+        --exe -o $(abspath $(BIN))
 
-# 运行生成的二进制文件
+# 其他目标
+all: default
+
 run: $(BIN)
 	@$^
 
