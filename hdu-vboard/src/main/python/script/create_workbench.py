@@ -20,7 +20,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
         if input_signal != "":
             pin_bindings.append(
                 # pin[1]=>pin即可改回原来版本
-                f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in input_pins)}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
+                f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{', '.join(f'{pin}' for pin in input_pins)}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
             )
 
     # 对于输出信号 绑定 更新
@@ -30,7 +30,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
 
         if output_signal != "":
             pin_bindings.append(
-                f"""output_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{output_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in output_pins)}}},\n\t\t\tsizeof(top->{output_signal})\n\t\t}}\n\t);"""
+                f"""output_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{output_signal}, \n\t\t\t{{{', '.join(f'{pin}' for pin in output_pins)}}},\n\t\t\tsizeof(top->{output_signal})\n\t\t}}\n\t);"""
             )
 
     # 检验clk信号是否存在
