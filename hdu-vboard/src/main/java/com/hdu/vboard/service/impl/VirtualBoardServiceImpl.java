@@ -6,7 +6,6 @@ import com.hdu.vboard.entity.bo.SimulationWorkerBO;
 import com.hdu.vboard.exception.CreateWorkbenchException;
 import com.hdu.vboard.exception.MakeWorkbenchException;
 import com.hdu.vboard.service.VirtualBoardService;
-import com.hdu.vboard.service.logProcessService;
 import com.hdu.vboard.util.VbSysFileUtil;
 import com.hdu.vboard.util.VirtualBoardUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class VirtualBoardServiceImpl implements VirtualBoardService {
     final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
-
-  @Resource
-  logProcessService logProcessService;
 
   @Override
   public Boolean createWorkbench(String workspaceName, String verilogFullPath, String bindFullPath) throws Exception {
@@ -48,11 +44,18 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     log.debug("workbench path:{}", VbSysFileUtil.getFullWorkbenchPath(""));
 
     Process createProcess = builder.start();
-//    logProcessService.logProcess(createProcess);
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(createProcess.getInputStream()));
+
     int exitCode = createProcess.waitFor();
     if (exitCode != 0) {
+      StringBuilder errMsg = new StringBuilder("Error creating simulation workspace, clear!\n" );
+      String line;
+      while ((line = reader.readLine()) != null) {
+        errMsg.append(line).append("\n");
+      }
       FileUtil.del(VbSysFileUtil.getFullWorkbenchPath(workspaceName));
-      throw new CreateWorkbenchException("Error creating simulation workspace, clear!" );
+      throw new CreateWorkbenchException(errMsg.toString());
     }
     log.debug("Success creating workbench");
     return true;
@@ -74,7 +77,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
 
     int exitCode = process.waitFor();
     if (exitCode != 0) {
-      StringBuilder errMsg = new StringBuilder("Error making workbench: ");
+      StringBuilder errMsg = new StringBuilder("Error making workbench,clear!\n");
       String line;
       while ((line = reader.readLine()) != null) {
         errMsg.append(line).append("\n");
@@ -101,12 +104,12 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     BufferedWriter simInput = new BufferedWriter(new OutputStreamWriter(simProcess.getOutputStream()));
     BufferedReader simOutput = new BufferedReader(new InputStreamReader(simProcess.getInputStream()));
 
-        SimulationWorkerBO simulationWorkerBO =
-                new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput, true);
-        log.info("Simulation process started for workspace: {}", workspaceName);
-        simulationWorkers.put(workspaceName, simulationWorkerBO);
-        return simulationWorkerBO;
-    }
+    SimulationWorkerBO simulationWorkerBO =
+        new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput, true);
+    log.info("Simulation process started for workspace: {}", workspaceName);
+    simulationWorkers.put(workspaceName, simulationWorkerBO);
+    return simulationWorkerBO;
+  }
 
   @Override
   public Boolean sendSignal(String workspaceName, String signal) throws Exception {
