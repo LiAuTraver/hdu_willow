@@ -13,18 +13,22 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 public class VirtualBoardServiceImpl implements VirtualBoardService {
-    final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
+  final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
 
   @Override
-  public Boolean createWorkbench(String workspaceName, String verilogFullPath, String bindFullPath) throws Exception {
-    if (!FileUtil.exist(verilogFullPath)) {
-      throw new CreateWorkbenchException("verilog file does not exist");
+  public Boolean createWorkbench(String workspaceName, List<String> verilogFullPaths, String bindFullPath) throws Exception {
+    for (String verilogFullPath : verilogFullPaths) {
+      if (!FileUtil.exist(verilogFullPath)) {
+        throw new CreateWorkbenchException("verilog file does not exist");
+      }
     }
     if (!FileUtil.exist(bindFullPath)) {
       throw new CreateWorkbenchException("bind file does not exist");
@@ -33,12 +37,25 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     // 脚本路径
     String scriptFullPath = VbSysFileUtil.getRootBasePath() + "src/main/python/script/create_workbench.py";
 
+    List<String> command = new ArrayList<>();
+    command.add("python3");
+    command.add(scriptFullPath);
 
-    ProcessBuilder builder = new ProcessBuilder(
-        "python3", scriptFullPath,
-        "--workspace-name", workspaceName,
-        "--verilog-file", verilogFullPath,
-        "--bind-json", bindFullPath);
+    command.add("--workspace-name");
+    command.add(workspaceName);
+
+    command.add("--verilog-files");
+    command.addAll(verilogFullPaths);
+
+    command.add("--bind-json");
+    command.add(bindFullPath);
+
+    command.add("--top-module");
+    command.add("top");
+
+    log.debug("python command:\n"+command);
+
+    ProcessBuilder builder = new ProcessBuilder(command);
     builder.directory(new File(VbSysFileUtil.getFullWorkbenchPath("")));
     builder.redirectErrorStream(true);
     log.debug("workbench path:{}", VbSysFileUtil.getFullWorkbenchPath(""));
@@ -49,7 +66,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
 
     int exitCode = createProcess.waitFor();
     if (exitCode != 0) {
-      StringBuilder errMsg = new StringBuilder("Error creating simulation workspace, clear!\n" );
+      StringBuilder errMsg = new StringBuilder("Error creating simulation workspace, clear!\n");
       String line;
       while ((line = reader.readLine()) != null) {
         errMsg.append(line).append("\n");

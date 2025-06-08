@@ -20,6 +20,8 @@ import cn.hutool.json.JSONObject;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
@@ -72,17 +74,20 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @PostMapping("/build")
   @CheckToken
-  public Result build(@RequestParam("verilogFile") MultipartFile verilogFile,
+  public Result build(@RequestParam("verilogFile") MultipartFile[] verilogFiles,
                       @RequestParam("bindFile") MultipartFile bindFile,
                       HttpServletRequest request) {
     String workspaceName = request.getHeader("token");
     try {
       log.debug("Hello to start");
-//      log.debug("token:{},type:{}", workspaceName,workspaceName.getClass());
-      String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
+      List<String> verilogFullPaths = new ArrayList<>();
+      for (MultipartFile verilogFile : verilogFiles) {
+        String path = vbSysFileService.saveVerilogFile(request, verilogFile);
+        verilogFullPaths.add(path);
+      }
       String bindFullPath = vbSysFileService.saveBindFile(request, bindFile);
       log.debug("Now to create virtual board");
-      virtualBoardService.createWorkbench(workspaceName, verilogFullPath, bindFullPath);
+      virtualBoardService.createWorkbench(workspaceName, verilogFullPaths, bindFullPath);
       log.debug("Ok to create workbench, now to check it");
       virtualBoardService.checkWorkbench(workspaceName);
       return Result.ok("Ok to build the virtual board");

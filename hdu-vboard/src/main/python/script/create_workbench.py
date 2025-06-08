@@ -94,7 +94,7 @@ int main(int argc, char **argv) {{
     print(f"Generated {output_file} successfully.")
 
 
-def create_workspace(workspace_name, module_name, verilog_file, bind_file):
+def create_workspace(workspace_name, module_name, verilog_files, bind_file):
     # 工作区基础路径
     base_dir = os.path.abspath(workspace_name)
 
@@ -111,12 +111,16 @@ def create_workspace(workspace_name, module_name, verilog_file, bind_file):
         os.makedirs(directory, exist_ok=True)
         print(f"Created directory: {directory}")
 
-    # 将 Verilog 文件复制到 vsrc 目录
-    vsrc_path = os.path.join(base_dir, "vsrc", f"{module_name}.v")
-    with open(vsrc_path, "wb") as f:
-        with open(verilog_file, "rb") as src:
-            f.write(src.read())
-    print(f"Copied Verilog file to: {vsrc_path}")
+    # 复制所有 verilog 文件
+    # verilog_file_names = []
+    for vfile in verilog_files:
+        basename = os.path.basename(vfile)
+        dst_path = os.path.join(base_dir, "vsrc", basename)
+        with open(dst_path, "wb") as f_dst:
+            with open(vfile, "rb") as f_src:
+                f_dst.write(f_src.read())
+        # verilog_file_names.append(basename)
+        print(f"Copied Verilog file to: {dst_path}")
 
     # 将 bind.json 文件复制到 constr 目录
     constr_path = os.path.join(base_dir, "constr", "bind.json")
@@ -200,20 +204,20 @@ def main():
         "--workspace-name", required=True, help="Name of the workspace to create."
     )
     parser.add_argument(
-        "--verilog-file", required=True, help="Path to the Verilog (.v) file."
+        "--verilog-files",nargs='+' ,required=True, help="Path to the Verilog (.v) file."
     )
     parser.add_argument(
         "--bind-json", required=True, help="Path to the bind.json file."
     )
+    parser.add_argument(
+        '--top-module',required=True,help='Top module name, deault: "top"',default="top"
+    )
 
     args = parser.parse_args()
 
-    # 获取顶层模块名（Verilog 文件名去掉扩展名）
-    module_name = os.path.basename(args.verilog_file).rsplit(".", 1)[0]
-
     try:
         create_workspace(
-            args.workspace_name, module_name, args.verilog_file, args.bind_json
+            args.workspace_name, args.top_module, args.verilog_files, args.bind_json
         )
     except Exception as e:
         print(f"Error: {e}")
