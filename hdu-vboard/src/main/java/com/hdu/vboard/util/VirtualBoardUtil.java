@@ -26,7 +26,7 @@ public class VirtualBoardUtil {
     log.debug("Now to get signal from virtual board");
     if ((line = simOutput.readLine()) != null) {
       // for dedebug
-      log.debug("Recieved:"+line);
+      log.debug("Recieved:" + line);
       JSONObject signalData = JSONUtil.parseObj(line);
       JSONObject outputJson = new JSONObject();
       outputJson.set("data", signalData);
