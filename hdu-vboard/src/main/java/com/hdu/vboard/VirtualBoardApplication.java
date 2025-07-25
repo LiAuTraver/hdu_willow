@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 @Import(WebConfiguration.class)
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.hdu")
 public class VirtualBoardApplication {
   public static void main(String[] args) {
     SpringApplication.run(VirtualBoardApplication.class, args);
