@@ -79,7 +79,7 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
                       HttpServletRequest request) {
     String workspaceName = request.getHeader("token");
     try {
-      log.debug("Hello to start");
+      log.debug("Hello token: {}", workspaceName);
       List<String> verilogFullPaths = new ArrayList<>();
       for (MultipartFile verilogFile : verilogFiles) {
         String path = vbSysFileService.saveVerilogFile(request, verilogFile);
@@ -108,9 +108,11 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     String token = request.getHeader("token");
     try {
       virtualBoardService.runWorkbench(token);
-      log.debug("Now it's running!");
+      log.debug("Now it's running! token: {}", token);
       JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(token);
       log.debug(finalJson.toString());
+      virtualBoardService.clearWorkbench(token);
+      log.debug("Clear the workbench files!");
       return Result.ok(finalJson);
     } catch (Exception e) {
       try {

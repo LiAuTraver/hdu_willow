@@ -81,7 +81,6 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     }
     redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
 
-    log.debug("Success creating workbench");
     return true;
   }
 
@@ -181,8 +180,6 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
       simulationWorkerBO.simulationProcess.destroy();
       log.debug("workbench:{} stopped!", workspaceName);
     }
-    VbSysFileUtil.deleteDirectory(new File(VbSysFileUtil.getFullWorkbenchPath(workspaceName)));
-    log.debug("workbench:{} cleared!", workspaceName);
     return true;
   }
 
