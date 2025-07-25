@@ -2,7 +2,9 @@ package com.hdu.vboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
+import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.vboard.entity.bo.SimulationWorkerBO;
+import com.hdu.vboard.entity.constant.VbRedisConstant;
 import com.hdu.vboard.exception.CreateWorkbenchException;
 import com.hdu.vboard.exception.MakeWorkbenchException;
 import com.hdu.vboard.service.VirtualBoardService;
@@ -14,13 +16,16 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class VirtualBoardServiceImpl implements VirtualBoardService {
+  @Resource
+  RedisUtil redisUtil;
+
   final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
 
   @Override
@@ -53,7 +58,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     command.add("--top-module");
     command.add("top");
 
-    log.debug("python command:\n"+command);
+    log.debug("python command:\n{}", command);
 
     ProcessBuilder builder = new ProcessBuilder(command);
     builder.directory(new File(VbSysFileUtil.getFullWorkbenchPath("")));
@@ -74,6 +79,8 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
       FileUtil.del(VbSysFileUtil.getFullWorkbenchPath(workspaceName));
       throw new CreateWorkbenchException(errMsg.toString());
     }
+    redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
+
     log.debug("Success creating workbench");
     return true;
   }
@@ -102,11 +109,16 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
 
       throw new MakeWorkbenchException(errMsg.toString());
     }
+    redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
+
     return true;
   }
 
   @Override
   public SimulationWorkerBO runWorkbench(String workspaceName) throws Exception {
+    if (!redisUtil.hasKey(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName)) {
+      throw new Exception("Connection time out! Workspace has been cleared!");
+    }
     ProcessBuilder runBuilder = new ProcessBuilder("make", "run");
     String workbenchPath = VbSysFileUtil.getFullWorkbenchPath(workspaceName);
     if (!FileUtil.exist(workbenchPath)) {
@@ -125,16 +137,23 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
         new SimulationWorkerBO(workspaceName, simProcess, simInput, simOutput, true);
     log.info("Simulation process started for workspace: {}", workspaceName);
     simulationWorkers.put(workspaceName, simulationWorkerBO);
+    redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
+
     return simulationWorkerBO;
   }
 
   @Override
   public Boolean sendSignal(String workspaceName, String signal) throws Exception {
+    if (!redisUtil.hasKey(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName)) {
+      throw new Exception("Connection time out! Workspace has been cleared!");
+    }
     SimulationWorkerBO simulationWorkerBO = simulationWorkers.get(workspaceName);
     if (simulationWorkerBO == null) {
       throw new MakeWorkbenchException("simulation workbench does not exist");
     }
     VirtualBoardUtil.sendSignalToVirtualBoard(simulationWorkerBO.simInput, signal);
+    redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
+
     return true;
   }
 
@@ -144,11 +163,14 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     if (simulationWorkerBO == null) {
       throw new MakeWorkbenchException("simulation workbench does not exist");
     }
+    redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
     return VirtualBoardUtil.getSignalFromVirtualBoard(simulationWorkerBO.simOutput);
   }
 
+  // 先停止线程 再清理工作区文件
   @Override
   public Boolean stopWorkbench(String workspaceName) throws Exception {
+    redisUtil.del(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName);
     SimulationWorkerBO simulationWorkerBO = simulationWorkers.remove(workspaceName);
     if (simulationWorkerBO == null) {
       throw new MakeWorkbenchException("simulation workbench does not exist");
@@ -164,6 +186,7 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     return true;
   }
 
+  // 单纯清理工作区文件
   @Override
   public Boolean clearWorkbench(String workspaceName) throws Exception {
     String workbenchFullPath = VbSysFileUtil.getFullWorkbenchPath(workspaceName);
