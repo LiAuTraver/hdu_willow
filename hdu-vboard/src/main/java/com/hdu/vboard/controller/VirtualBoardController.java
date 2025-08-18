@@ -1,29 +1,21 @@
 package com.hdu.vboard.controller;
 
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.IdUtil;
 import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
-import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.vo.UserVO;
-import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.vboard.service.VbSysFileService;
 import com.hdu.vboard.service.VirtualBoardService;
-import hdu.svccmn.ParamUtil;
-import hdu.svccmn.UserStatisticService;
-import hdu.svccmn.UserStatisticServiceImpl;
-import hdu.svccmn.exception.IdentifyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import cn.hutool.json.JSONObject;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+
 
 @RestController
 @RequestMapping("/vb")
@@ -34,12 +26,6 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @Resource
   VbSysFileService vbSysFileService;
-
-  @Resource
-  private RedisUtil redisUtil;
-
-  @Resource
-  private UserStatisticService userStatisticService;
 
 //    @Override
 //    @PostMapping("/listPage")
@@ -145,22 +131,6 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
   public Result finish(HttpServletRequest request) {
     String token = request.getHeader("token");
     try {
-
-      UserVO userIdFromToken = userStatisticService.getUserByToken(token);
-      if (userIdFromToken == null)
-        log.error("an unexpect error has occurred: user with token {} is null", token);
-      else {
-        final Long sTime = (Long) redisUtil.get(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token);
-        long curTime = System.currentTimeMillis();
-
-        if (sTime == null || sTime <= 0 || sTime >= curTime)
-          log.error("an unexpect error has occurred: user with token {} has no exp time", token);
-        else {
-          userStatisticService.updateUserExpTime(userIdFromToken, Duration.ofMillis(curTime - sTime));
-          redisUtil.del(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token);
-        }
-      }
-
       return Result.ok(virtualBoardService.stopWorkbench(token));
     } catch (Exception e) {
       log.error(e.getMessage());
@@ -170,14 +140,6 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @GetMapping("generateToken")
   public Result generateToken(UserVO userVO) {
-    if (!ParamUtil.CheckUserInfoLegal(userVO)) {
-      return Result.error("身份信息有误");
-    }
-    String salt = IdUtil.simpleUUID();
-    String token = ParamUtil.generateUserToken(userVO, salt);
-    redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-    redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-    userStatisticService.storeUserByToken(token, userVO);
-    return Result.ok(token);
+    return virtualBoardService.generateToken(userVO);
   }
 }

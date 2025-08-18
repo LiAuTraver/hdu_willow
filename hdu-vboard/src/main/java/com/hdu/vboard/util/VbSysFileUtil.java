@@ -72,7 +72,7 @@ public class VbSysFileUtil {
     return FileUtil.getAbsolutePath(getWorkbenchPath(dirName));
   }
 
-  public static void deleteDirectory(File directory) throws IOException {
+  public static void deleteDirectory(File directory) {
     File[] files = directory.listFiles();
     if (files != null) {
       for (File file : files) {
