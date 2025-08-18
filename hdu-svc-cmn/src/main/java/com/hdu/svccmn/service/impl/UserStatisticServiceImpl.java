@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +24,21 @@ public class UserStatisticServiceImpl implements UserStatisticService {
 
   @Override
   @Transactional
-  public void updateUserExpTime(@NonNull UserVO userVO, @NonNull Duration expTime) {
+  public void updateUserExptime(@NonNull String token, @Nullable Long sTime) {
+    UserVO userVO = tokTable.remove(token); // remove the token from the table
+
+    if (userVO == null) {
+      log.error("an unexpect error has occurred: user with token {} is null", token);
+      return;
+    }
+    long curTime = System.currentTimeMillis();
+
+    if (sTime == null || sTime <= 0 || sTime >= curTime) {
+      log.error("an unexpect error has occurred: user with token {} has no exp time", token);
+      return;
+    }
+    Duration expTime = Duration.ofMillis(curTime - sTime);
+
     // todo: is it needed to also modify the UserVO?
     Duration currentTotalTime = userVO.getTotActiveTime();
     userVO.setTotActiveTime(currentTotalTime.plus(expTime));
@@ -52,16 +68,10 @@ public class UserStatisticServiceImpl implements UserStatisticService {
     userService.updateById(userPO);
     log.info("Updated user {} statistics: +{} ms, +1 exp",
         userVO.getUsername(), expTimeInMillis);
-
   }
 
   @Override
   public void storeUserByToken(String token, UserVO userVO) {
     tokTable.put(token, userVO);
-  }
-
-  @Override
-  public UserVO getUserByToken(String token) {
-    return tokTable.get(token);
   }
 }

@@ -1,6 +1,8 @@
 package com.hdu.vboard.service;
 
 import cn.hutool.json.JSONObject;
+import com.hdu.hdufpga.entity.Result;
+import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.vboard.entity.bo.SimulationWorkerBO;
 
 import java.util.List;
@@ -19,4 +21,6 @@ public interface VirtualBoardService {
   Boolean stopWorkbench(String workspaceName) throws Exception;
 
   Boolean clearWorkbench(String workspaceName) throws Exception;
+
+  Result generateToken(UserVO userVO);
 }

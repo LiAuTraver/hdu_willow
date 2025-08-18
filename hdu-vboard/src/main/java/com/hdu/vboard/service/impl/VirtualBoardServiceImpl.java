@@ -1,6 +1,7 @@
 package com.hdu.vboard.service.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
 import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.vboard.entity.bo.SimulationWorkerBO;
@@ -10,6 +11,8 @@ import com.hdu.vboard.exception.MakeWorkbenchException;
 import com.hdu.vboard.service.VirtualBoardService;
 import com.hdu.vboard.util.VbSysFileUtil;
 import com.hdu.vboard.util.VirtualBoardUtil;
+import hdu.svccmn.ParamUtil;
+import hdu.svccmn.UserStatisticService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,12 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
   RedisUtil redisUtil;
 
   final ConcurrentHashMap<String, SimulationWorkerBO> simulationWorkers = new ConcurrentHashMap<>();
+
+  @Resource
+  RedisUtil redisUtil;
+
+  @Resource
+  UserStatisticService userStatisticService;
 
   @Override
   public Boolean createWorkbench(String workspaceName, List<String> verilogFullPaths, String bindFullPath) throws Exception {
@@ -137,7 +146,6 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     log.info("Simulation process started for workspace: {}", workspaceName);
     simulationWorkers.put(workspaceName, simulationWorkerBO);
     redisUtil.set(VbRedisConstant.REDIS_VB_TTL_PREFIX + workspaceName, true, VbRedisConstant.REDIS_VB_TTL_LIMIT, TimeUnit.SECONDS);
-
     return simulationWorkerBO;
   }
 
@@ -192,5 +200,17 @@ public class VirtualBoardServiceImpl implements VirtualBoardService {
     }
     VbSysFileUtil.deleteDirectory(new File(workbenchFullPath));
     return true;
+  }
+  @Override
+  public Result generateToken(UserVO userVO) {
+    if (!ParamUtil.CheckUserInfoLegal(userVO)) {
+      return Result.error("身份信息有误");
+    }
+    String salt = IdUtil.simpleUUID();
+    String token = ParamUtil.generateUserToken(userVO, salt);
+    redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
+    redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
+    userStatisticService.storeUserByToken(token, userVO);
+    return Result.ok(token);
   }
 }
