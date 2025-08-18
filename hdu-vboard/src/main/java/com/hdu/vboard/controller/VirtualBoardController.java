@@ -1,18 +1,15 @@
 package com.hdu.vboard.controller;
 
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.IdUtil;
 import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
 import com.hdu.hdufpga.entity.constant.RedisConstant;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.hdufpga.util.RedisUtil;
 import com.hdu.vboard.service.VbSysFileService;
+import com.hdu.vboard.service.VbTokenService;
 import com.hdu.vboard.service.VirtualBoardService;
-import hdu.svccmn.ParamUtil;
-import hdu.svccmn.UserStatisticService;
-import hdu.svccmn.UserStatisticServiceImpl;
-import hdu.svccmn.exception.IdentifyException;
+
+import com.hdu.svccmn.service.UserStatisticService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/vb")
@@ -40,6 +36,9 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @Resource
   private UserStatisticService userStatisticService;
+
+  @Resource
+  private VbTokenService vbTokenService;
 
 //    @Override
 //    @PostMapping("/listPage")
@@ -168,16 +167,13 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     }
   }
 
-  @GetMapping("generateToken")
+  @GetMapping("/generateToken")
   public Result generateToken(UserVO userVO) {
-    if (!ParamUtil.CheckUserInfoLegal(userVO)) {
-      return Result.error("身份信息有误");
+    try {
+      return Result.ok(vbTokenService.generateToken(userVO));
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      return Result.error(e.getMessage());
     }
-    String salt = IdUtil.simpleUUID();
-    String token = ParamUtil.generateUserToken(userVO, salt);
-    redisUtil.set(RedisConstant.REDIS_TTL_PREFIX + token, true, RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-    redisUtil.set(RedisConstant.REDIS_EXP_START_TIME_PREFIX + token, System.currentTimeMillis(), RedisConstant.REDIS_TTL_LIMIT, TimeUnit.SECONDS);
-    userStatisticService.storeUserByToken(token, userVO);
-    return Result.ok(token);
   }
 }

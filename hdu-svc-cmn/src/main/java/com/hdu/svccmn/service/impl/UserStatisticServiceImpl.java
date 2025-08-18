@@ -1,8 +1,9 @@
-package hdu.svccmn;
+package com.hdu.svccmn.service.impl;
 
 import com.hdu.hdufpga.entity.po.UserPO;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.hdufpga.service.UserService;
+import com.hdu.svccmn.service.UserStatisticService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;

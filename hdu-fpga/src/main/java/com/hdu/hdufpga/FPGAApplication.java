@@ -1,6 +1,6 @@
 package com.hdu.hdufpga;
 
-import hdu.svccmn.UserStatisticServiceImpl;
+import com.hdu.svccmn.service.impl.UserStatisticServiceImpl;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

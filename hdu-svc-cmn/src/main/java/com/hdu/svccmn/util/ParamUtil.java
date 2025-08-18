@@ -1,4 +1,4 @@
-package hdu.svccmn;
+package com.hdu.svccmn.util;
 
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.mysql.cj.util.StringUtils;

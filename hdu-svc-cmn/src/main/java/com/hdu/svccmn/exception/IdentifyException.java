@@ -1,4 +1,4 @@
-package hdu.svccmn.exception;
+package com.hdu.svccmn.exception;
 
 public class IdentifyException extends Exception {
     public IdentifyException(String s) {
