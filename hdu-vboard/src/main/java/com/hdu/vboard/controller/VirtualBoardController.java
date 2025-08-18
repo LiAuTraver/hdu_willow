@@ -144,14 +144,4 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
       return Result.error(e.getMessage());
     }
   }
-
-  @GetMapping("/generateToken")
-  public Result generateToken(UserVO userVO) {
-    try {
-      return Result.ok(vbTokenService.generateToken(userVO));
-    } catch (Exception e) {
-      log.error(e.getMessage());
-      return Result.error(e.getMessage());
-    }
-  }
 }
