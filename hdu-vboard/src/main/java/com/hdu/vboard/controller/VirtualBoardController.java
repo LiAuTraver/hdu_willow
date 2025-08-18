@@ -16,8 +16,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 
 @RestController
@@ -29,9 +27,6 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @Resource
   VbSysFileService vbSysFileService;
-
-  @Resource
-  private RedisUtil redisUtil;
 
   @Resource
   private UserStatisticService userStatisticService;
