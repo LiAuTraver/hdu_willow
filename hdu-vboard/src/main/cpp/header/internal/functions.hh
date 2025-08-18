@@ -44,7 +44,7 @@ inline void update_input_signals_from_json(const nlohmann::json &input_json) {
                 else
                     hex_num = 0;
                 // 内循环可能会超 要判断
-                while (hex_num && byte_idx < pin.max_byte) {
+                for (int i = 0;i < INPUT_HEX_MAX_BITS && byte_idx < pin.max_byte;i++) {
                     if (hex_num & 1)
                         byte_ptr[byte_idx] |= (1 << bit_idx);
                     else
@@ -71,15 +71,15 @@ inline void update_input_signals_from_json(const nlohmann::json &input_json) {
 
 // 更新变量信号
 // 理论上只需要更新输出变量即可
-inline int update_output_signals() {
-    int change_flag = 0;
+inline unsigned int update_output_signals() {
+    unsigned int change_flag = 0;
     for (auto &pin : output_pins_map) {
         uint8_t *byte_ptr = static_cast<uint8_t *>(pin.ptr);
         int byte_idx = 0;
         int bit_idx = 0;
         for (auto p = pin.pins_vec.begin();p != pin.pins_vec.end();p++) {
             if (byte_idx >= pin.max_byte)  break;
-            if (*p >= OUTPUT0 && *p <= OUTPUT3) {
+            if (*p >= OUTPUT0 && *p <= OUTPUT5) {
                 unsigned int new_value = 0;
                 // 内循环会超， 需要判断
                 for (int i = 0;i < OUTPUT_HEX_MAX_BITS && byte_idx < pin.max_byte;i++) {
@@ -101,7 +101,7 @@ inline int update_output_signals() {
                 change_flag = change_flag || (new_value ^ pins_value[*p]);
                 pins_value[*p] = new_value;
             } else {
-                int new_value = (byte_ptr[byte_idx] >> bit_idx) & 1;
+                unsigned int new_value = (byte_ptr[byte_idx] >> bit_idx) & 1;
                 change_flag = change_flag || (new_value ^ pins_value[*p]);  // 用逻辑运算短路提高效率
 
                 pins_value[*p] = new_value;     // 更新信号值

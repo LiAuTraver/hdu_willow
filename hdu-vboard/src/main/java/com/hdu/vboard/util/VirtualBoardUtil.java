@@ -15,7 +15,6 @@ public class VirtualBoardUtil {
     }
     simInput.write(signal_json + "\n");
     simInput.flush();
-    log.debug("send signal to virtual board:{}", signal_json);
   }
 
   public static JSONObject getSignalFromVirtualBoard(BufferedReader simOutput) throws Exception {
@@ -23,10 +22,7 @@ public class VirtualBoardUtil {
     if (simOutput == null) {
       throw new Exception("simOutput is null");
     }
-    log.debug("Now to get signal from virtual board");
     if ((line = simOutput.readLine()) != null) {
-      // for dedebug
-      log.debug("Recieved:"+line);
       JSONObject signalData = JSONUtil.parseObj(line);
       JSONObject outputJson = new JSONObject();
       outputJson.set("data", signalData);

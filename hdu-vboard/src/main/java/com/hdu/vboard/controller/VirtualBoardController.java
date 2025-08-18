@@ -9,9 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import cn.hutool.json.JSONObject;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 
 @RestController
 @RequestMapping("/vb")
@@ -56,17 +60,20 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @PostMapping("/build")
   @CheckToken
-  public Result build(@RequestParam("verilogFile") MultipartFile verilogFile,
+  public Result build(@RequestParam("verilogFile") MultipartFile[] verilogFiles,
                       @RequestParam("bindFile") MultipartFile bindFile,
                       HttpServletRequest request) {
     String workspaceName = request.getHeader("token");
     try {
-      log.debug("Hello to start");
-//      log.debug("token:{},type:{}", workspaceName,workspaceName.getClass());
-      String verilogFullPath = vbSysFileService.saveVerilogFile(request, verilogFile);
+      log.debug("Hello token: {}", workspaceName);
+      List<String> verilogFullPaths = new ArrayList<>();
+      for (MultipartFile verilogFile : verilogFiles) {
+        String path = vbSysFileService.saveVerilogFile(request, verilogFile);
+        verilogFullPaths.add(path);
+      }
       String bindFullPath = vbSysFileService.saveBindFile(request, bindFile);
       log.debug("Now to create virtual board");
-      virtualBoardService.createWorkbench(workspaceName, verilogFullPath, bindFullPath);
+      virtualBoardService.createWorkbench(workspaceName, verilogFullPaths, bindFullPath);
       log.debug("Ok to create workbench, now to check it");
       virtualBoardService.checkWorkbench(workspaceName);
       return Result.ok("Ok to build the virtual board");
@@ -87,9 +94,11 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
     String token = request.getHeader("token");
     try {
       virtualBoardService.runWorkbench(token);
-      log.debug("Now it's running!");
+      log.debug("Now it's running! token: {}", token);
       JSONObject finalJson = virtualBoardService.getSignalFromVirtualBoard(token);
       log.debug(finalJson.toString());
+      virtualBoardService.clearWorkbench(token);
+      log.debug("Clear the workbench files!");
       return Result.ok(finalJson);
     } catch (Exception e) {
       try {

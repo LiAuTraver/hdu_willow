@@ -5,8 +5,10 @@ import com.hdu.hdufpga.entity.Result;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.vboard.entity.bo.SimulationWorkerBO;
 
+import java.util.List;
+
 public interface VirtualBoardService {
-  Boolean createWorkbench(String workspaceName, String verilogPath, String bindPath) throws Exception;
+  Boolean createWorkbench(String workspaceName, List<String> verilogPath, String bindPath) throws Exception;
 
   Boolean checkWorkbench(String workspaceName) throws Exception;
 

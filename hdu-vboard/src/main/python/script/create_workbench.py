@@ -9,8 +9,6 @@ def generate_main_cpp(bind_file, module_name, output_file):
         bind_data = json.load(f)
 
     pin_bindings = []
-    update_from_json_calls = []
-    update_to_json_calls = []
 
     # 对于输入信号 绑定 读取 更新
     for input_entry in bind_data["inputRows"]:
@@ -20,7 +18,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
         if input_signal != "":
             pin_bindings.append(
                 # pin[1]=>pin即可改回原来版本
-                f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in input_pins)}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
+                f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{', '.join(f'{pin}' for pin in input_pins)}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
             )
 
     # 对于输出信号 绑定 更新
@@ -30,7 +28,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
 
         if output_signal != "":
             pin_bindings.append(
-                f"""output_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{output_signal}, \n\t\t\t{{{', '.join(f'{pin[1]}' for pin in output_pins)}}},\n\t\t\tsizeof(top->{output_signal})\n\t\t}}\n\t);"""
+                f"""output_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{output_signal}, \n\t\t\t{{{', '.join(f'{pin}' for pin in output_pins)}}},\n\t\t\tsizeof(top->{output_signal})\n\t\t}}\n\t);"""
             )
 
     # 检验clk信号是否存在
@@ -38,10 +36,7 @@ def generate_main_cpp(bind_file, module_name, output_file):
         input_signal = bind_data["CLK"]
         pin_bindings.append(
             # pin[1]=>pin即可改回原来版本
-            f"""pins_map[&top->{input_signal}] = {{CLK}};"""
-        )
-        update_from_json_calls.append(
-            f"update_input_signal_from_json(input_json, &top->{input_signal});"
+            f"""input_pins_map.push_back(\n\t\tpin_map {{\n\t\t\t&top->{input_signal}, \n\t\t\t{{{"CLK"}}},\n\t\t\tsizeof(top->{input_signal})\n\t\t}}\n\t);"""
         )
 
     # 生成 main.cpp 的内容
@@ -99,7 +94,7 @@ int main(int argc, char **argv) {{
     print(f"Generated {output_file} successfully.")
 
 
-def create_workspace(workspace_name, module_name, verilog_file, bind_file):
+def create_workspace(workspace_name, module_name, verilog_files, bind_file):
     # 工作区基础路径
     base_dir = os.path.abspath(workspace_name)
 
@@ -116,12 +111,16 @@ def create_workspace(workspace_name, module_name, verilog_file, bind_file):
         os.makedirs(directory, exist_ok=True)
         print(f"Created directory: {directory}")
 
-    # 将 Verilog 文件复制到 vsrc 目录
-    vsrc_path = os.path.join(base_dir, "vsrc", f"{module_name}.v")
-    with open(vsrc_path, "wb") as f:
-        with open(verilog_file, "rb") as src:
-            f.write(src.read())
-    print(f"Copied Verilog file to: {vsrc_path}")
+    # 复制所有 verilog 文件
+    # verilog_file_names = []
+    for vfile in verilog_files:
+        basename = os.path.basename(vfile)
+        dst_path = os.path.join(base_dir, "vsrc", basename)
+        with open(dst_path, "wb") as f_dst:
+            with open(vfile, "rb") as f_src:
+                f_dst.write(f_src.read())
+        # verilog_file_names.append(basename)
+        print(f"Copied Verilog file to: {dst_path}")
 
     # 将 bind.json 文件复制到 constr 目录
     constr_path = os.path.join(base_dir, "constr", "bind.json")
@@ -157,29 +156,34 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
-# 搜索项目的 Verilog 和 C/C++ 源文件
-VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
-# CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-CSRCS = $(abspath ./csrc/main.cpp)
 # 默认目标
 default: $(BIN)
 
 # 创建构建目录（如果不存在）
 $(shell mkdir -p $(BUILD_DIR))
 
-# Verilator 编译规则
-INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+# 搜索项目的 Verilog 和 main.cpp
+# 只指定顶层 Verilog 源文件，其余通过 `include` 实现
+VTOP_V = $(abspath ./vsrc/$(TOPNAME).v)
+CSRCS = $(abspath ./csrc/main.cpp)
+
+# C/C++ 编译器标志
+INCFLAGS = $(addprefix -I, $(INC_PATH)) -I./vsrc
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="V$(TOPNAME)"
 
 # 生成二进制文件的规则
-$(BIN): $(VSRCS) $(CSRCS)
+$(BIN): $(VTOP_V) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)
-	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
-		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
-		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
+	$(VERILATOR) $(VERILATOR_CFLAGS) -I./vsrc \
+        --top-module $(TOPNAME) $^ \
+    	$(addprefix -CFLAGS , $(CXXFLAGS)) \
+  		$(addprefix -LDFLAGS , $(LDFLAGS)) \
+        --Mdir $(OBJ_DIR) \
+        --exe -o $(abspath $(BIN))
 
-# 运行生成的二进制文件
+# 其他目标
+all: default
+
 run: $(BIN)
 	@$^
 
@@ -200,20 +204,20 @@ def main():
         "--workspace-name", required=True, help="Name of the workspace to create."
     )
     parser.add_argument(
-        "--verilog-file", required=True, help="Path to the Verilog (.v) file."
+        "--verilog-files",nargs='+' ,required=True, help="Path to the Verilog (.v) file."
     )
     parser.add_argument(
         "--bind-json", required=True, help="Path to the bind.json file."
     )
+    parser.add_argument(
+        '--top-module',required=True,help='Top module name, deault: "top"',default="top"
+    )
 
     args = parser.parse_args()
 
-    # 获取顶层模块名（Verilog 文件名去掉扩展名）
-    module_name = os.path.basename(args.verilog_file).rsplit(".", 1)[0]
-
     try:
         create_workspace(
-            args.workspace_name, module_name, args.verilog_file, args.bind_json
+            args.workspace_name, args.top_module, args.verilog_files, args.bind_json
         )
     except Exception as e:
         print(f"Error: {e}")

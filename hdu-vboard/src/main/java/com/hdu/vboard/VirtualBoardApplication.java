@@ -10,12 +10,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-// FIXME: springboot cannot find bean vvvvvv
-@Import({WebConfiguration.class, RedisUtil.class, UserStatisticServiceImpl.class})
-@SpringBootApplication
-@EnableTransactionManagement
-@EnableDubbo
-@EnableAsync
+
+@Import(WebConfiguration.class)
+@SpringBootApplication(scanBasePackages = "com.hdu")
 public class VirtualBoardApplication {
   public static void main(String[] args) {
     SpringApplication.run(VirtualBoardApplication.class, args);
