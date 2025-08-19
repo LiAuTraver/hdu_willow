@@ -4,7 +4,10 @@ import com.hdu.hdufpga.annotation.CheckToken;
 import com.hdu.hdufpga.entity.Result;
 import com.hdu.hdufpga.entity.vo.UserVO;
 import com.hdu.vboard.service.VbSysFileService;
+import com.hdu.vboard.service.VbTokenService;
 import com.hdu.vboard.service.VirtualBoardService;
+
+import com.hdu.svccmn.service.UserStatisticService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,8 +16,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 
 @RestController
@@ -26,6 +27,12 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
 
   @Resource
   VbSysFileService vbSysFileService;
+
+  @Resource
+  private UserStatisticService userStatisticService;
+
+  @Resource
+  private VbTokenService vbTokenService;
 
 //    @Override
 //    @PostMapping("/listPage")
@@ -136,10 +143,5 @@ public class VirtualBoardController /*extends BaseController<VirtualBoardService
       log.error(e.getMessage());
       return Result.error(e.getMessage());
     }
-  }
-
-  @GetMapping("generateToken")
-  public Result generateToken(UserVO userVO) {
-    return virtualBoardService.generateToken(userVO);
   }
 }

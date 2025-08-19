@@ -1,4 +1,4 @@
-package hdu.svccmn.exception;
+package com.hdu.svccmn.exception;
 
 import java.io.IOException;
 

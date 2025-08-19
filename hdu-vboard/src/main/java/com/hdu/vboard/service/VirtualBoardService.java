@@ -21,6 +21,4 @@ public interface VirtualBoardService {
   Boolean stopWorkbench(String workspaceName) throws Exception;
 
   Boolean clearWorkbench(String workspaceName) throws Exception;
-
-  Result generateToken(UserVO userVO);
 }
