@@ -12,8 +12,8 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ~/Desktop/workbench/db/mysql/init:/docker-entrypoint-initdb.d
-      - ~/Desktop/workbench/db/mysql/data:/var/lib/mysql
+      - N:/db/mysql/data:/var/lib/mysql
+      - N:/db/mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pMySQL142536"]
       interval: 30s
@@ -34,10 +34,10 @@ services:
       MYSQL_SERVICE_DB_NAME: nacos
       MYSQL_SERVICE_DB_PARAM: useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
     ports:
-      - 8848:8848
-      - 9848:9848
-      - 9849:9849
-      - 7848:7848
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+      - "7848:7848"
     depends_on:
       mysql:
         condition: service_healthy
@@ -50,7 +50,7 @@ services:
     ports:
       - "8091:8091"
     volumes:
-      - ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
+      - Z:/hdu_willow/fpga_intermediate/source/seata-config:/root/seata-config
     depends_on:
       - nacos
 
@@ -62,12 +62,12 @@ services:
       - "6379:6379"
     volumes:
       - type: bind
-        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/redis.conf
+        source: Z:/hdu_willow/fpga_intermediate/source/redis.conf
         target: /usr/local/etc/redis/redis.conf
       - type: bind
-        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/redis.log
+        source: Z:/hdu_willow/fpga_intermediate/source/redis.log
         target: /var/log/redis.log
-      - /workspace/fpga/backend/redis-data:/data
+      - N:/redis-data:/data
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     environment:
       SPRING_DATASOURCE_PLATFORM: mysql
@@ -97,5 +97,5 @@ services:
     command: ["sh", "mqbroker", "-c", "/opt/rocketmq-5.3.1/conf/broker.conf"]
     volumes:
       - type: bind
-        source: ~/Desktop/workbench/hdu_willow/fpga_intermediate/source/broker.conf
+        source: Z:/hdu_willow/fpga_intermediate/source/broker.conf
         target: /opt/rocketmq-5.3.1/conf/broker.conf
